@@ -37,17 +37,18 @@
 (defun composable--is-string-num-p (s)
   (string-match-p "^[0-9]+" s))
 
+(defun composable--execute-action (command arg key)
+  (save-excursion
+    (push-mark nil nil t)
+    (let ((current-prefix-arg (composable--def-arg arg)))
+      (call-interactively (gethash key binders)))
+    (call-interactively command)))
+
 (defun composable--read-keys (command arg)
   (let ((key (read-key-sequence nil)))
     (if (composable--is-string-num-p key)
-        (let* ((num (string-to-int key))
-               (new-arg (+ (* arg 10) num)))
-          (composable--read-keys command new-arg))
-      (save-excursion
-        (push-mark nil nil t)
-        (let ((current-prefix-arg (composable--def-arg arg)))
-          (call-interactively (gethash key binders)))
-        (call-interactively command)))))
+        (composable--read-keys command (+ (* arg 10) (string-to-int key)))
+      (composable--execute-action command arg key))))
 
 (defun create-action (command)
   (lambda ()
@@ -75,7 +76,9 @@
  '("b" backward-word)
  '("n" next-line)
  '("p" previous-line)
- '("SPC" composable-mark-line))
+ '("SPC" composable-mark-line)
+ '("{" backward-paragraph)
+ '("}" forward-paragraph))
 
 (add-actions
  '("C-w" kill-region)
@@ -83,6 +86,5 @@
  '("M-;" smart-comment-region))
 
 (provide 'composable)
-(provide 'composable.el)
 
 ;;; composable.el ends here
