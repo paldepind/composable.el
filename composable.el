@@ -60,9 +60,12 @@
   (dolist (a as)
     (global-set-key (kbd (car a)) (create-action (cadr a)))))
 
-(defun composable-mark-line ()
-  (interactive)
-  (beginning-of-line) (push-mark nil nil t) (forward-line))
+(defun composable-mark-line (arg)
+  "Marks ARG lines."
+  (interactive "p")
+  (beginning-of-line)
+  (push-mark nil nil t)
+  (dotimes (i arg) (forward-line)))
 
 (add-motions
  '("e" move-end-of-line)

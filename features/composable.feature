@@ -57,3 +57,17 @@ Feature: composable
       1. line
       3. line
     """
+
+  Scenario: Kill several lines
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "1."
+    And I press "C-w 2 SPC"
+    Then I should see:
+    """
+      3. line
+    """  
