@@ -22,6 +22,7 @@
 
 (Before
  ;; Before each scenario is run
+ (transient-mark-mode 1)
  )
 
 (After

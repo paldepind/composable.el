@@ -3,28 +3,57 @@ Feature: composable
   As an Emacs user
   I want composable editing
 
-  Scenario: Delete to end of line
+  Background:
     Given the buffer is empty
+    And there is no region selected
+
+  Scenario: Delete to end of line
     When I insert "foo bar"
     And I place the cursor after "foo"
     And I press "C-w e"
-    Then I should see "foo"
+    Then I should not see "bar"
+    Then I should see pattern "^foo$"
+
+  Scenario: Delete to beginning of line
+    When I insert "foo bar"
+    And I place the cursor after "foo "
+    And I press "C-w a"
+    Then I should not see "foo"
+    Then I should see pattern "^bar$"
 
   Scenario: C-w with active region
-    Given the buffer is empty
-    When I insert "foo bar"
+    When I insert "foo bar baz"
     And I select " bar"
     And I press "C-w"
-    Then I should see "foo"
+    Then I should see "foo baz"
 
-Feature: Do Some things
-  In order to do something
-  As a user
-  I want to do something
+  Scenario: Deleting word
+    When I insert "first second third fourth"
+    And I place the cursor after "first"
+    And I press "C-w f"
+    Then I should see "first third fourth"
 
-  Scenario: Do Something
-    Given I have "something"
-    When I have "something"
-    Then I should have "something"
-    And I should have "something"
-    But I should not have "something"
+  Scenario: Passing numbers to motion
+    When I insert "first second third fourth"
+    And I place the cursor after "first"
+    And I start an action chain
+    And I press "C-w"
+    And I press "2"
+    And I press "f"
+    And I execute the action chain
+    Then I should see "first fourth"
+
+  Scenario: C-w to kill line
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "2."
+    And I press "C-w SPC"
+    Then I should see:
+    """
+      1. line
+      3. line
+    """

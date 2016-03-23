@@ -32,19 +32,37 @@
   (dolist (b bs)
     (puthash (kbd (car b)) (cadr b) binders)))
 
+(defun composable--def-arg (arg) (if (zerop arg) 1 arg))
+
+(defun composable--is-string-num-p (s)
+  (string-match-p "^[0-9]+" s))
+
+(defun composable--read-keys (command arg)
+  (let ((key (read-key-sequence nil)))
+    (if (composable--is-string-num-p key)
+        (let* ((num (string-to-int key))
+               (new-arg (+ (* arg 10) num)))
+          (composable--read-keys command new-arg))
+      (save-excursion
+        (push-mark nil nil t)
+        (let ((current-prefix-arg (composable--def-arg arg)))
+          (call-interactively (gethash key binders)))
+        (call-interactively command)))))
+
 (defun create-action (command)
   (lambda ()
     (interactive)
     (if mark-active
         (call-interactively command)
-      (save-excursion
-        (push-mark nil nil t)
-        (call-interactively (gethash (read-key-sequence nil) binders))
-        (call-interactively command)))))
+      (composable--read-keys command 0))))
 
 (defun add-actions (&rest as)
   (dolist (a as)
     (global-set-key (kbd (car a)) (create-action (cadr a)))))
+
+(defun composable-mark-line ()
+  (interactive)
+  (beginning-of-line) (push-mark nil nil t) (forward-line))
 
 (add-motions
  '("e" move-end-of-line)
@@ -53,8 +71,8 @@
  '("f" forward-word)
  '("b" backward-word)
  '("n" next-line)
- '("p" previous-line))
-
+ '("p" previous-line)
+ '("SPC" composable-mark-line))
 
 (add-actions
  '("C-w" kill-region)
