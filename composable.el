@@ -26,36 +26,8 @@
 
 ;;; Code:
 
-(defvar composable--binders (make-hash-table :test 'equal))
-
-(defun composable-add-motions (bs)
-  "Add motions.
-BS must be pairs of a keybinding and a function."
-  (dolist (b bs)
-    (puthash (kbd (car b)) (cadr b) composable--binders)))
-
-(defun composable--def-arg (arg)
-  "Return 1 if ARG is 0 otherwise ARG."
-  (if (zerop arg) 1 arg))
-
-(defun composable--is-string-num-p (s)
-  "Return t if S begins with a number."
-  (string-match-p "^[0-9]+" s))
-
-(defun composable--execute-action (command arg key)
-  "Execute the action COMMAND with ARG in the region KEY."
-  (save-excursion
-    (push-mark nil nil t)
-    (let ((current-prefix-arg (composable--def-arg arg)))
-      (call-interactively (gethash key composable--binders)))
-    (call-interactively command)))
-
-(defun composable--read-keys (command arg)
-  "Read keys and then incoke COMMAND with ARG."
-  (let ((key (read-key-sequence nil)))
-    (if (composable--is-string-num-p key)
-        (composable--read-keys command (+ (* arg 10) (string-to-number key)))
-      (composable--execute-action command arg key))))
+(defvar composable--command)
+(defvar composable--skip-first)
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -63,9 +35,8 @@ The returned function will ask for a motion, mark the region it
 specifies and call COMMAND on the region."
   (lambda ()
     (interactive)
-    (if mark-active
-        (call-interactively command)
-      (composable--read-keys command 0))))
+    (setq composable--command command)
+    (composable-range-mode)))
 
 (defun composable-def (commands)
   "Define composable function from a list COMMANDS.
@@ -85,21 +56,50 @@ For each function named foo a function name composable-foo is created."
 (composable-def
  '(kill-region kill-ring-save smart-comment-region))
 
-(composable-add-motions
- '(("e" move-end-of-line)
-   ("a" move-beginning-of-line)
-   ("'" avy-goto-char-in-line)
-   ("f" forward-word)
-   ("b" backward-word)
-   ("n" next-line)
-   ("p" previous-line)
-   ("l" composable-mark-line)
-   ("{" backward-paragraph)
-   ("}" forward-paragraph)))
+(defun composable--post-command-hook-handler ()
+  "Called after each command when composable-rangemode is on."
+  (cond (composable--skip-first
+         (push-mark nil nil t)
+         (setq composable--skip-first nil))
+        ((/= (point) (mark))
+         (call-interactively composable--command)
+         (goto-char (mark))
+         (composable-range-mode -1)
+         (remove-hook 'post-command-hook 'composable--mode-hook))))
+
 
 (global-set-key (kbd "C-w") 'composable-kill-region)
 (global-set-key (kbd "M-w") 'composable-kill-ring-save)
 (global-set-key (kbd "M-;") 'composable-smart-comment-region)
+
+(define-minor-mode composable-range-mode
+  "Composable mode."
+  :lighter "Range "
+  :keymap
+  '(((kbd "e") . move-end-of-line)
+    ((kbd "1") . digit-argument)
+    ((kbd "2") . digit-argument)
+    ((kbd "3") . digit-argument)
+    ((kbd "4") . digit-argument)
+    ((kbd "5") . digit-argument)
+    ((kbd "6") . digit-argument)
+    ((kbd "7") . digit-argument)
+    ((kbd "8") . digit-argument)
+    ((kbd "9") . digit-argument)
+    ((kbd "0") . digit-argument)
+    ((kbd "a") . move-beginning-of-line)
+    ((kbd "'") . avy-goto-char-in-line)
+    ((kbd "f") . forward-word)
+    ((kbd "b") . backward-word)
+    ((kbd "n") . next-line)
+    ((kbd "p") . previous-line)
+    ((kbd "l") . composable-mark-line)
+    ((kbd "{") . backward-paragraph)
+    ((kbd "}") . forward-paragraph))
+  :after-hook
+  (when (not mark-active)
+    (setq composable--skip-first t))
+  (add-hook 'post-command-hook 'composable--post-command-hook-handler))
 
 (provide 'composable)
 
