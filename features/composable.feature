@@ -70,4 +70,25 @@ Feature: composable
     Then I should see:
     """
       3. line
-    """  
+    """
+
+  Scenario: Mark line
+    When I insert:
+    """
+    1
+    a line with text
+    3
+    """
+    And I place the cursor after "with"
+    And I press "C-SPC l"
+    Then the region should be:
+    """
+    a line with text
+
+    """
+
+  Scenario: Mark three words forward
+    When I insert "first second third fourth fifth"
+    And I place the cursor before "second"
+    And I press "C-SPC 3 f"
+    Then the region should be "second third fourth"

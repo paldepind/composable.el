@@ -56,21 +56,20 @@ For each function named foo a function name composable-foo is created."
 (composable-def
  '(kill-region kill-ring-save smart-comment-region))
 
+(defvar composable--activated-with-marking nil)
+
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-rangemode is on."
   (cond (composable--skip-first
-         (push-mark nil nil t)
+         (if (not mark-active)
+             (push-mark nil nil t))
          (setq composable--skip-first nil))
         ((/= (point) (mark))
-         (call-interactively composable--command)
-         (goto-char (mark))
+         (when (commandp composable--command)
+           (call-interactively composable--command)
+           (goto-char (mark)))
          (composable-range-mode -1)
-         (remove-hook 'post-command-hook 'composable--mode-hook))))
-
-
-(global-set-key (kbd "C-w") 'composable-kill-region)
-(global-set-key (kbd "M-w") 'composable-kill-ring-save)
-(global-set-key (kbd "M-;") 'composable-smart-comment-region)
+         (remove-hook 'post-command-hook 'composable--post-command-hook-handler))))
 
 (define-minor-mode composable-range-mode
   "Composable mode."
@@ -97,9 +96,26 @@ For each function named foo a function name composable-foo is created."
     ((kbd "{") . backward-paragraph)
     ((kbd "}") . forward-paragraph))
   :after-hook
-  (when (not mark-active)
-    (setq composable--skip-first t))
-  (add-hook 'post-command-hook 'composable--post-command-hook-handler))
+  (if composable-range-mode
+      (progn
+        (if (and mark-active (not composable--activated-with-marking))
+            (progn (call-interactively composable--command)
+                   (composable-range-mode -1))
+          (setq composable--skip-first t)
+          (add-hook 'post-command-hook 'composable--post-command-hook-handler)))
+    (setq composable--command nil)))
+
+(defun composable--set-mark-command-advice (&rest _)
+  "Advice for `set-mark-command'.  _ is ignored."
+  (unless composable-range-mode
+    (setq composable--activated-with-marking t)
+    (composable-range-mode)))
+
+(advice-add 'set-mark-command :after 'composable--set-mark-command-advice)
+
+(global-set-key (kbd "C-w") 'composable-kill-region)
+(global-set-key (kbd "M-w") 'composable-kill-ring-save)
+(global-set-key (kbd "M-;") 'composable-smart-comment-region)
 
 (provide 'composable)
 
