@@ -51,7 +51,7 @@ Feature: composable
       3. line
     """
     And I place the cursor after "2."
-    And I press "C-w SPC"
+    And I press "C-w l"
     Then I should see:
     """
       1. line
@@ -66,7 +66,7 @@ Feature: composable
       3. line
     """
     And I place the cursor after "1."
-    And I press "C-w 2 SPC"
+    And I press "C-w 2 l"
     Then I should see:
     """
       3. line

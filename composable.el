@@ -28,7 +28,7 @@
 
 (defvar composable--binders (make-hash-table :test 'equal))
 
-(defun composable-add-motions (&rest bs)
+(defun composable-add-motions (bs)
   "Add motions.
 BS must be pairs of a keybinding and a function."
   (dolist (b bs)
@@ -86,16 +86,16 @@ For each function named foo a function name composable-foo is created."
  '(kill-region kill-ring-save smart-comment-region))
 
 (composable-add-motions
- '("e" move-end-of-line)
- '("a" move-beginning-of-line)
- '("'" avy-goto-char-in-line)
- '("f" forward-word)
- '("b" backward-word)
- '("n" next-line)
- '("p" previous-line)
- '("SPC" composable-mark-line)
- '("{" backward-paragraph)
- '("}" forward-paragraph))
+ '(("e" move-end-of-line)
+   ("a" move-beginning-of-line)
+   ("'" avy-goto-char-in-line)
+   ("f" forward-word)
+   ("b" backward-word)
+   ("n" next-line)
+   ("p" previous-line)
+   ("l" composable-mark-line)
+   ("{" backward-paragraph)
+   ("}" forward-paragraph)))
 
 (global-set-key (kbd "C-w") 'composable-kill-region)
 (global-set-key (kbd "M-w") 'composable-kill-ring-save)
