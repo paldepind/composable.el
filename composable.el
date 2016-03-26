@@ -54,15 +54,13 @@ For each function named foo a function name composable-foo is created."
   (dotimes (_ arg) (forward-line)))
 
 (composable-def
- '(kill-region kill-ring-save smart-comment-region))
+ '(kill-region kill-ring-save indent-region comment-region smart-comment-region))
 
 (defvar composable--activated-with-marking nil)
 
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-rangemode is on."
   (cond (composable--skip-first
-         (if (not mark-active)
-             (push-mark nil nil t))
          (setq composable--skip-first nil))
         ((/= (point) (mark))
          (when (commandp composable--command)
@@ -85,7 +83,6 @@ For each function named foo a function name composable-foo is created."
     ((kbd "7") . digit-argument)
     ((kbd "8") . digit-argument)
     ((kbd "9") . digit-argument)
-    ((kbd "0") . digit-argument)
     ((kbd "a") . move-beginning-of-line)
     ((kbd "'") . avy-goto-char-in-line)
     ((kbd "f") . forward-word)
@@ -94,19 +91,26 @@ For each function named foo a function name composable-foo is created."
     ((kbd "p") . previous-line)
     ((kbd "l") . composable-mark-line)
     ((kbd "{") . backward-paragraph)
-    ((kbd "}") . forward-paragraph))
-  :after-hook
+    ((kbd "}") . forward-paragraph)
+    ((kbd "s") . mark-sexp)
+    ((kbd "w") . mark-word)
+    ((kbd "h") . mark-paragraph)
+    ((kbd "m") . mark-sentence)
+    ((kbd "u") . er/mark-url)
+    ((kbd "r") . er/mark))
   (if composable-range-mode
       (progn
         (if (and mark-active (not composable--activated-with-marking))
             (progn (call-interactively composable--command)
                    (composable-range-mode -1))
+          (if (not mark-active) (push-mark nil nil t))
           (setq composable--skip-first t)
           (add-hook 'post-command-hook 'composable--post-command-hook-handler)))
+    (setq composable--activated-with-marking nil)
     (setq composable--command nil)))
 
-(defun composable--set-mark-command-advice (&rest _)
-  "Advice for `set-mark-command'.  _ is ignored."
+(defun composable--set-mark-command-advice (&rest args)
+  "Advice for `set-mark-command'.  ARGS are ignored."
   (unless composable-range-mode
     (setq composable--activated-with-marking t)
     (composable-range-mode)))

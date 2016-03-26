@@ -1,7 +1,11 @@
-* TODO Mark stuff with C-SPC
+* DONE Mark stuff with C-SPC
+  CLOSED: [2016-03-25 Fri 10:06]
 ** TODO Make sure it works with smartparens
-* TODO Figure out best way to selecte inner/outer stuff
+* TODO Figure out best way to select inner/outer stuff
   Should probably use either smartparens or expand-region
-* TODO Convert symmetric movements to regions
-* TODO Handle C-* and M-* bindings
-* TODO Handle bindings spanning multiple keys
+* TODO Convert symmetric movements to region
+* TODO Convert regions to movements
+* DONE Handle C-* and M-* bindings
+  CLOSED: [2016-03-25 Fri 10:06]
+* DONE Handle bindings spanning multiple keys
+  CLOSED: [2016-03-25 Fri 10:07]
