@@ -69,6 +69,11 @@ For each function named foo a function name composable-foo is created."
          (composable-range-mode -1)
          (remove-hook 'post-command-hook 'composable--post-command-hook-handler))))
 
+(defun composable-keyboard-quit ()
+  "Leave range mode."
+  (pop-mark)
+  (composable-range-mode -1))
+
 (define-minor-mode composable-range-mode
   "Composable mode."
   :lighter "Range "
@@ -97,7 +102,9 @@ For each function named foo a function name composable-foo is created."
     ((kbd "h") . mark-paragraph)
     ((kbd "m") . mark-sentence)
     ((kbd "u") . er/mark-url)
-    ((kbd "r") . er/mark))
+    ((kbd "r") . er/mark)
+    ((kbd "g") . composable-keyboard-quit)
+    ((kbd "C-g") . composable-keyboard-quit))
   (if composable-range-mode
       (progn
         (if (and mark-active (not composable--activated-with-marking))
@@ -109,16 +116,24 @@ For each function named foo a function name composable-foo is created."
     (setq composable--activated-with-marking nil)
     (setq composable--command nil)))
 
-(defun composable--set-mark-command-advice (&rest args)
-  "Advice for `set-mark-command'.  ARGS are ignored."
+(defun composable--set-mark-command-advice (&rest _)
+  "Advice for `set-mark-command'.  _ are ignored."
   (unless composable-range-mode
     (setq composable--activated-with-marking t)
     (composable-range-mode)))
+
+(defun composable--deactivate-mark-hook-handler ()
+  "Leave range mode when the mark is disabled.
+This also allows for leaving range mode by pressing \\[keyboard-quit]."
+  (composable-range-mode -1))
+
+(add-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
 
 (advice-add 'set-mark-command :after 'composable--set-mark-command-advice)
 
 (global-set-key (kbd "C-w") 'composable-kill-region)
 (global-set-key (kbd "M-w") 'composable-kill-ring-save)
+(global-set-key (kbd "C-M-\\") 'composable-indent-region)
 (global-set-key (kbd "M-;") 'composable-smart-comment-region)
 
 (provide 'composable)

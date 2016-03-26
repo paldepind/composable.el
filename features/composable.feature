@@ -92,3 +92,11 @@ Feature: composable
     And I place the cursor before "second"
     And I press "C-SPC 3 f"
     Then the region should be "second third fourth"
+
+  Scenario: Cancel with C-g
+    When I insert "first second third"
+    And I place the cursor before "second"
+    And I press "C-w"
+    And I press "C-g"
+    And I press "a"
+    Then I should see "first asecond third"
