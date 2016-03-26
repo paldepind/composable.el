@@ -103,7 +103,7 @@ For each function named foo a function name composable-foo is created."
     ((kbd "C-g") . composable-keyboard-quit))
   (if composable-range-mode
       (progn
-        (if (not mark-active) (push-mark nil nil t))
+        (if (not mark-active) (push-mark nil t))
         (setq composable--skip-first t)
         (add-hook 'post-command-hook 'composable--post-command-hook-handler))
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
