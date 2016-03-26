@@ -33,6 +33,24 @@ Feature: composable
     And I press "C-w f"
     Then I should see "first third fourth"
 
+  Scenario: Delete paragraph
+    When I insert:
+    """
+    Foo
+
+    Paragraph
+
+    Bar
+    """
+    And I place the cursor after "aragr"
+    And I press "C-w h"
+    Then I should see:
+    """
+    Foo
+
+    Bar
+    """
+
   Scenario: Passing numbers to motion
     When I insert "first second third fourth"
     And I place the cursor after "first"
@@ -100,3 +118,11 @@ Feature: composable
     And I press "C-g"
     And I press "a"
     Then I should see "first asecond third"
+
+  Scenario: Use end of region
+    When I insert "first second third"
+    And I place the cursor before " second"
+    And I press "C-w"
+    And I press "."
+    And I press "l"
+    Then I should see pattern "^first$"

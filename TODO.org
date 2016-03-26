@@ -3,8 +3,13 @@
 ** TODO Make sure it works with smartparens
 * TODO Figure out best way to select inner/outer stuff
   Should probably use either smartparens or expand-region
-* TODO Convert symmetric movements to region
-* TODO Convert regions to movements
+* TODO Prefixes
+** TODO Convert symmetric movements to region
+** DONE Use end of region
+   CLOSED: [2016-03-26 Sat 15:40]
+** DONE Use beginning of region
+   CLOSED: [2016-03-26 Sat 15:40]
+* TODO Nifty repeat feature
 * DONE Handle C-* and M-* bindings
   CLOSED: [2016-03-25 Fri 10:06]
 * DONE Handle bindings spanning multiple keys

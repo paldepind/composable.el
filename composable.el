@@ -28,6 +28,8 @@
 
 (defvar composable--command)
 (defvar composable--skip-first)
+(defvar composable--prefix-arg)
+(defvar composable--start-point)
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -65,6 +67,10 @@ For each function named foo a function name composable-foo is created."
   (cond (composable--skip-first
          (setq composable--skip-first nil))
         ((/= (point) (mark))
+         (when (and mark-active composable--prefix-arg)
+           (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max)))
+             (set-mark (funcall fn (mark) composable--start-point))
+             (goto-char (funcall fn (point) composable--start-point))))
          (when (commandp composable--command)
            (call-interactively composable--command)
            (goto-char (mark)))
@@ -84,6 +90,8 @@ For each function named foo a function name composable-foo is created."
     ((kbd "7") . digit-argument)
     ((kbd "8") . digit-argument)
     ((kbd "9") . digit-argument)
+    ((kbd ".") . composable-end-argument)
+    ((kbd ",") . composable-begin-argument)
     ((kbd "a") . move-beginning-of-line)
     ((kbd "'") . avy-goto-char-in-line)
     ((kbd "f") . forward-word)
@@ -104,10 +112,12 @@ For each function named foo a function name composable-foo is created."
   (if composable-range-mode
       (progn
         (if (not mark-active) (push-mark nil t))
+        (setq composable--start-point (point))
         (setq composable--skip-first t)
         (add-hook 'post-command-hook 'composable--post-command-hook-handler))
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
     (setq composable--activated-with-marking nil)
+    (setq composable--prefix-arg nil)
     (setq composable--command nil)))
 
 (defun composable--set-mark-command-advice (&rest _)
@@ -115,6 +125,16 @@ For each function named foo a function name composable-foo is created."
   (unless composable-range-mode
     (setq composable--activated-with-marking t)
     (composable-range-mode)))
+
+(defun composable-begin-argument ()
+  "Set prefix argument to end."
+  (interactive)
+  (setq composable--prefix-arg 'composable-begin))
+
+(defun composable-end-argument ()
+  "Set prefix argument to end."
+  (interactive)
+  (setq composable--prefix-arg 'composable-end))
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave range mode when the mark is disabled.
