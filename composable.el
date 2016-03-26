@@ -35,8 +35,10 @@ The returned function will ask for a motion, mark the region it
 specifies and call COMMAND on the region."
   (lambda ()
     (interactive)
-    (setq composable--command command)
-    (composable-range-mode)))
+    (if mark-active
+        (call-interactively command)
+      (setq composable--command command)
+      (composable-range-mode))))
 
 (defun composable-def (commands)
   "Define composable function from a list COMMANDS.
@@ -66,13 +68,7 @@ For each function named foo a function name composable-foo is created."
          (when (commandp composable--command)
            (call-interactively composable--command)
            (goto-char (mark)))
-         (composable-range-mode -1)
-         (remove-hook 'post-command-hook 'composable--post-command-hook-handler))))
-
-(defun composable-keyboard-quit ()
-  "Leave range mode."
-  (pop-mark)
-  (composable-range-mode -1))
+         (composable-range-mode -1))))
 
 (define-minor-mode composable-range-mode
   "Composable mode."
@@ -107,12 +103,10 @@ For each function named foo a function name composable-foo is created."
     ((kbd "C-g") . composable-keyboard-quit))
   (if composable-range-mode
       (progn
-        (if (and mark-active (not composable--activated-with-marking))
-            (progn (call-interactively composable--command)
-                   (composable-range-mode -1))
-          (if (not mark-active) (push-mark nil nil t))
-          (setq composable--skip-first t)
-          (add-hook 'post-command-hook 'composable--post-command-hook-handler)))
+        (if (not mark-active) (push-mark nil nil t))
+        (setq composable--skip-first t)
+        (add-hook 'post-command-hook 'composable--post-command-hook-handler))
+    (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
     (setq composable--activated-with-marking nil)
     (setq composable--command nil)))
 
