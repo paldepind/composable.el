@@ -126,3 +126,12 @@ Feature: composable
     And I press "."
     And I press "l"
     Then I should see pattern "^first$"
+
+  Scenario: Repeat killing of word
+    When I insert "first second third fourth fifth"
+    And I place the cursor before " second"
+    And I press "C-w"
+    And I press "f"
+    And I press "f"
+    And I press "f"
+    Then I should see "first fifth"

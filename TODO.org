@@ -9,8 +9,11 @@
    CLOSED: [2016-03-26 Sat 15:40]
 ** DONE Use beginning of region
    CLOSED: [2016-03-26 Sat 15:40]
-* TODO Nifty repeat feature
+* DONE Nifty repeat feature
+  CLOSED: [2016-03-27 Sun 22:57]
+* TODO Refactor repaet feature
 * DONE Handle C-* and M-* bindings
   CLOSED: [2016-03-25 Fri 10:06]
 * DONE Handle bindings spanning multiple keys
   CLOSED: [2016-03-25 Fri 10:07]
+* Consider replacing minor mode with `set-transient-map`

@@ -31,6 +31,8 @@
 (defvar composable--prefix-arg)
 (defvar composable--start-point)
 
+(defvar composable-repeat t) ;; TODO: make this a defcustom
+
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
 The returned function will ask for a motion, mark the region it
@@ -64,17 +66,31 @@ For each function named foo a function name composable-foo is created."
 
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-rangemode is on."
-  (cond (composable--skip-first
-         (setq composable--skip-first nil))
-        ((/= (point) (mark))
-         (when (and mark-active composable--prefix-arg)
-           (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max)))
-             (set-mark (funcall fn (mark) composable--start-point))
-             (goto-char (funcall fn (point) composable--start-point))))
-         (when (commandp composable--command)
-           (call-interactively composable--command)
-           (goto-char (mark)))
-         (composable-range-mode -1))))
+  (cond
+   (composable--skip-first
+    (setq composable--skip-first nil))
+   ((/= (point) (mark))
+    (when (and mark-active composable--prefix-arg)
+      (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max)))
+        (set-mark (funcall fn (mark) composable--start-point))
+        (goto-char (funcall fn (point) composable--start-point))))
+    (when (commandp composable--command)
+      (let ((motion this-command))
+        (prin1 this-command)
+        (call-interactively composable--command)
+        (goto-char (mark))
+        (when composable-repeat
+          (set-transient-map
+           (let ((map (make-sparse-keymap))
+                 (cmd composable--command))
+             (define-key map (vector last-command-event)
+               (lambda ()
+                 (interactive)
+                 (call-interactively motion)
+                 (call-interactively cmd)))
+             map)
+           t))))
+    (composable-range-mode -1))))
 
 (define-minor-mode composable-range-mode
   "Composable mode."
