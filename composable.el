@@ -60,7 +60,8 @@ For each function named foo a function name composable-foo is created."
   (dotimes (_ arg) (forward-line)))
 
 (composable-def
- '(kill-region kill-ring-save indent-region comment-region smart-comment-region))
+ '(kill-region kill-ring-save indent-region comment-region
+   smart-comment-region upcase-region))
 
 (defvar composable--activated-with-marking nil)
 
@@ -82,19 +83,30 @@ For each function named foo a function name composable-foo is created."
         (set-mark (funcall fn (mark) pos))
         (goto-char (funcall fn (point) pos))))
     (when (commandp composable--command)
-      (let ((motion this-command))
+      (let ((motion this-command)
+            (point-marker (point-marker))
+            (mark-marker (copy-marker (mark)))
+            (cmd composable--command))
         (call-interactively composable--command)
         (goto-char (marker-position composable--start-point))
         (set-marker composable--start-point nil)
         (when composable-repeat
           (set-transient-map
-           (let ((cmd composable--command))
-             (composable--singleton-map (vector last-command-event)
-               (lambda ()
-                 (interactive)
-                 (call-interactively motion)
-                 (call-interactively cmd))))
-           t))))
+           (composable--singleton-map
+            (vector last-command-event)
+            (lambda ()
+              (interactive)
+              (save-excursion
+                (goto-char (marker-position point-marker))
+                (set-mark (marker-position mark-marker))
+                (call-interactively motion)
+                (call-interactively cmd)
+                (set-marker point-marker (point))
+                (set-marker mark-marker (mark)))))
+           t
+           (lambda ()
+             (set-marker point-marker nil)
+             (set-marker mark-marker nil))))))
     (composable-range-mode -1))))
 
 (define-minor-mode composable-range-mode
@@ -170,6 +182,7 @@ This also allows for leaving range mode by pressing \\[keyboard-quit]."
 (global-set-key (kbd "M-w") 'composable-kill-ring-save)
 (global-set-key (kbd "C-M-\\") 'composable-indent-region)
 (global-set-key (kbd "M-;") 'composable-smart-comment-region)
+(global-set-key (kbd "C-x C-u") 'composable-upcase-region)
 
 (provide 'composable)
 

@@ -135,3 +135,39 @@ Feature: composable
     And I press "f"
     And I press "f"
     Then I should see "first fifth"
+
+  Scenario: Repeat uppercasign backward word
+    When I insert "first second third fourth fifth"
+    And I place the cursor before "fifth"
+    And I press "C-x C-u"
+    And I press "b"
+    And I press "b"
+    And I press "b"
+    Then I should see "first SECOND THIRD FOURTH fifth"
+
+  Scenario: Repeat uppercasing paragraph
+    When I insert:
+    """
+    Foo
+
+    Paragraph
+
+    Bar
+
+    Baz
+    """
+    And I place the cursor after "Fo"
+    And I press "C-x C-u"
+    And I press "h"
+    And I press "h"
+    And I press "h"
+    Then I should see:
+    """
+    FOO
+
+    PARAGRAPH
+
+    BAR
+
+    Baz
+    """
