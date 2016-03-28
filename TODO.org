@@ -9,11 +9,18 @@
    CLOSED: [2016-03-26 Sat 15:40]
 ** DONE Use beginning of region
    CLOSED: [2016-03-26 Sat 15:40]
-* DONE Nifty repeat feature
-  CLOSED: [2016-03-27 Sun 22:57]
-* TODO Refactor repaet feature
+* Repeating
+** DONE Repeat killing
+   CLOSED: [2016-03-27 Sun 22:57]
+** TODO Repeat marking
+** TODO Repeat yanking
+** DONE Repeat function that operate on region
+   CLOSED: [2016-03-28 Mon 16:16]
+* TODO Refactor repeat feature
 * DONE Handle C-* and M-* bindings
   CLOSED: [2016-03-25 Fri 10:06]
 * DONE Handle bindings spanning multiple keys
   CLOSED: [2016-03-25 Fri 10:07]
+* TODO Proper docstring for composable commands
 * Consider replacing minor mode with `set-transient-map`
+Probably not going to work.
