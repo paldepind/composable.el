@@ -64,6 +64,12 @@ For each function named foo a function name composable-foo is created."
 
 (defvar composable--activated-with-marking nil)
 
+(defun composable--singleton-map (key def)
+  "Create a map with a single KEY with definition DEF."
+  (let ((map (make-sparse-keymap)))
+    (define-key map key def)
+    map))
+
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-rangemode is on."
   (cond
@@ -71,24 +77,23 @@ For each function named foo a function name composable-foo is created."
     (setq composable--skip-first nil))
    ((/= (point) (mark))
     (when (and mark-active composable--prefix-arg)
-      (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max)))
-        (set-mark (funcall fn (mark) composable--start-point))
-        (goto-char (funcall fn (point) composable--start-point))))
+      (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max))
+            (pos (marker-position composable--start-point)))
+        (set-mark (funcall fn (mark) pos))
+        (goto-char (funcall fn (point) pos))))
     (when (commandp composable--command)
       (let ((motion this-command))
-        (prin1 this-command)
         (call-interactively composable--command)
-        (goto-char (mark))
+        (goto-char (marker-position composable--start-point))
+        (set-marker composable--start-point nil)
         (when composable-repeat
           (set-transient-map
-           (let ((map (make-sparse-keymap))
-                 (cmd composable--command))
-             (define-key map (vector last-command-event)
+           (let ((cmd composable--command))
+             (composable--singleton-map (vector last-command-event)
                (lambda ()
                  (interactive)
                  (call-interactively motion)
-                 (call-interactively cmd)))
-             map)
+                 (call-interactively cmd))))
            t))))
     (composable-range-mode -1))))
 
@@ -128,7 +133,7 @@ For each function named foo a function name composable-foo is created."
   (if composable-range-mode
       (progn
         (if (not mark-active) (push-mark nil t))
-        (setq composable--start-point (point))
+        (setq composable--start-point (point-marker))
         (setq composable--skip-first t)
         (add-hook 'post-command-hook 'composable--post-command-hook-handler))
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
