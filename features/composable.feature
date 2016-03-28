@@ -171,3 +171,20 @@ Feature: composable
 
     Baz
     """
+
+  Scenario: Selecting lines with repeat
+    When I insert:
+    """
+    1. line
+    2. line
+    3. line
+    4. line
+    """
+    And I place the cursor after "2."
+    And I press "C-SPC l l"
+    Then the region should be:
+    """
+    2. line
+    3. line
+
+    """

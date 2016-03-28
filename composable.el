@@ -56,8 +56,13 @@ For each function named foo a function name composable-foo is created."
   "Mark ARG lines."
   (interactive "p")
   (beginning-of-line)
-  (push-mark nil nil t)
-  (dotimes (_ arg) (forward-line)))
+  (push-mark
+   (save-excursion
+     (when (region-active-p)
+       (goto-char (mark)))
+     (forward-line arg)
+     (point))
+   nil t))
 
 (composable-def
  '(kill-region kill-ring-save indent-region comment-region
