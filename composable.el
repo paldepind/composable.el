@@ -82,31 +82,30 @@ For each function named foo a function name composable-foo is created."
             (pos (marker-position composable--start-point)))
         (set-mark (funcall fn (mark) pos))
         (goto-char (funcall fn (point) pos))))
-    (when (commandp composable--command)
-      (let ((motion this-command)
-            (point-marker (point-marker))
-            (mark-marker (copy-marker (mark)))
-            (cmd composable--command))
+    (let ((motion this-command)
+          (point-marker (point-marker))
+          (cmd composable--command))
+      (when (commandp composable--command)
         (call-interactively composable--command)
-        (goto-char (marker-position composable--start-point))
-        (set-marker composable--start-point nil)
-        (when composable-repeat
-          (set-transient-map
-           (composable--singleton-map
-            (vector last-command-event)
-            (lambda ()
-              (interactive)
-              (save-excursion
-                (goto-char (marker-position point-marker))
-                (set-mark (marker-position mark-marker))
-                (call-interactively motion)
-                (call-interactively cmd)
-                (set-marker point-marker (point))
-                (set-marker mark-marker (mark)))))
-           t
-           (lambda ()
-             (set-marker point-marker nil)
-             (set-marker mark-marker nil))))))
+        (goto-char (marker-position composable--start-point)))
+      (when composable-repeat
+        (set-transient-map
+         (composable--singleton-map
+          (vector last-command-event)
+          (lambda ()
+            (interactive)
+            (goto-char (marker-position point-marker))
+            ;; Activate mark, some mark functions expands region when mark is active
+            (set-mark (mark))
+            (call-interactively motion)
+            (set-marker point-marker (point))
+            (when (commandp cmd)
+              (call-interactively cmd)
+              (goto-char (marker-position composable--start-point)))))
+         t
+         (lambda ()
+           (set-marker point-marker nil)
+           (set-marker composable--start-point nil)))))
     (composable-range-mode -1))))
 
 (define-minor-mode composable-range-mode
