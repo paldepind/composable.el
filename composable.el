@@ -30,6 +30,7 @@
 (defvar composable--skip-first)
 (defvar composable--prefix-arg)
 (defvar composable--start-point)
+(defvar composable--fn-pairs (make-hash-table :test 'equal))
 
 (defvar composable-repeat t) ;; TODO: make this a defcustom
 
@@ -82,11 +83,16 @@ For each function named foo a function name composable-foo is created."
    (composable--skip-first
     (setq composable--skip-first nil))
    ((/= (point) (mark))
-    (when (and mark-active composable--prefix-arg)
-      (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max))
-            (pos (marker-position composable--start-point)))
-        (set-mark (funcall fn (mark) pos))
-        (goto-char (funcall fn (point) pos))))
+    (when composable--prefix-arg
+      (cond
+       ((gethash this-command composable--fn-pairs)
+        (set-mark (point))
+        (call-interactively (gethash this-command composable--fn-pairs)))
+       (mark-active
+        (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max))
+              (pos (marker-position composable--start-point)))
+          (set-mark (funcall fn (mark) pos))
+          (goto-char (funcall fn (point) pos))))))
     (let ((motion this-command)
           (point-marker (point-marker))
           (cmd composable--command))
@@ -112,6 +118,13 @@ For each function named foo a function name composable-foo is created."
            (set-marker point-marker nil)
            (set-marker composable--start-point nil)))))
     (composable-range-mode -1))))
+
+(defun composable-add-pair (fn1 fn2)
+  "Take two commands FN1 and FN2 and add them as pairs."
+  (puthash fn2 fn1 composable--fn-pairs)
+  (puthash fn1 fn2 composable--fn-pairs))
+
+(composable-add-pair 'forward-word 'backward-word)
 
 (define-minor-mode composable-range-mode
   "Composable mode."

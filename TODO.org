@@ -4,16 +4,20 @@
 * TODO Figure out best way to select inner/outer stuff
   Should probably use either smartparens or expand-region
 * TODO Prefixes
-** TODO Convert symmetric movements to region
+** DONE Convert symmetric movements to region
+   CLOSED: [2016-03-29 Tue 19:15]
 ** DONE Use end of region
    CLOSED: [2016-03-26 Sat 15:40]
 ** DONE Use beginning of region
    CLOSED: [2016-03-26 Sat 15:40]
-* Repeating
+* DONE Repeating
+  CLOSED: [2016-03-29 Tue 18:08]
 ** DONE Repeat killing
    CLOSED: [2016-03-27 Sun 22:57]
-** TODO Repeat marking
-** TODO Repeat yanking
+** DONE Repeat marking
+   CLOSED: [2016-03-29 Tue 18:08]
+** DONE Repeat kill ring save
+   CLOSED: [2016-03-29 Tue 18:08]
 ** DONE Repeat function that operate on region
    CLOSED: [2016-03-28 Mon 16:16]
 * TODO Refactor repeat feature
