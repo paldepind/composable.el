@@ -3,7 +3,8 @@
 ** TODO Make sure it works with smartparens
 * TODO Figure out best way to select inner/outer stuff
   Should probably use either smartparens or expand-region
-* TODO Prefixes
+* DONE Prefixes
+  CLOSED: [2016-03-30 Wed 18:45]
 ** DONE Convert symmetric movements to region
    CLOSED: [2016-03-29 Tue 19:15]
 ** DONE Use end of region
@@ -20,7 +21,8 @@
    CLOSED: [2016-03-29 Tue 18:08]
 ** DONE Repeat function that operate on region
    CLOSED: [2016-03-28 Mon 16:16]
-* TODO Refactor repeat feature
+* DONE Refactor repeat feature
+  CLOSED: [2016-03-30 Wed 18:45]
 * DONE Handle C-* and M-* bindings
   CLOSED: [2016-03-25 Fri 10:06]
 * DONE Handle bindings spanning multiple keys
@@ -28,3 +30,4 @@
 * TODO Proper docstring for composable commands
 * Consider replacing minor mode with `set-transient-map`
 Probably not going to work.
+* TODO Marking function for joining lines

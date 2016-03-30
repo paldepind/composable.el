@@ -77,6 +77,30 @@ For each function named foo a function name composable-foo is created."
     (define-key map key def)
     map))
 
+(defun composable--call-excursion (command start-point)
+  "Call COMMAND if set then go to START-POINT."
+  (when (commandp command)
+    (call-interactively command)
+    (goto-char (marker-position composable--start-point))))
+
+(defun composable--repeater (excursion-marker motion command)
+  "Preserve point at EXCURSION-MARKER when doing MOTION and COMMAND."
+  (lambda ()
+    (interactive)
+    (goto-char (marker-position excursion-marker))
+    ;; Activate mark, some mark functions expands region when mark is active
+    (set-mark (mark))
+    (call-interactively motion)
+    (set-marker excursion-marker (point))
+    (composable--call-excursion command composable--start-point)))
+
+(defun composable--contain-marking (prefix)
+  "Remove marking befor or after point based on PREFIX."
+  (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max))
+        (pos (marker-position composable--start-point)))
+    (set-mark (funcall fn (mark) pos))
+    (goto-char (funcall fn (point) pos))))
+
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-rangemode is on."
   (cond
@@ -88,34 +112,18 @@ For each function named foo a function name composable-foo is created."
        ((gethash this-command composable--fn-pairs)
         (set-mark (point))
         (call-interactively (gethash this-command composable--fn-pairs)))
-       (mark-active
-        (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max))
-              (pos (marker-position composable--start-point)))
-          (set-mark (funcall fn (mark) pos))
-          (goto-char (funcall fn (point) pos))))))
+       (mark-active (composable--contain-marking composable--prefix-arg))))
     (let ((motion this-command)
-          (point-marker (point-marker))
-          (cmd composable--command))
-      (when (commandp composable--command)
-        (call-interactively composable--command)
-        (goto-char (marker-position composable--start-point)))
+          (excursion-marker (point-marker)))
+      (composable--call-excursion composable--command composable--start-point)
       (when composable-repeat
         (set-transient-map
          (composable--singleton-map
           (vector last-command-event)
-          (lambda ()
-            (interactive)
-            (goto-char (marker-position point-marker))
-            ;; Activate mark, some mark functions expands region when mark is active
-            (set-mark (mark))
-            (call-interactively motion)
-            (set-marker point-marker (point))
-            (when (commandp cmd)
-              (call-interactively cmd)
-              (goto-char (marker-position composable--start-point)))))
+          (composable--repeater excursion-marker motion composable--command))
          t
          (lambda ()
-           (set-marker point-marker nil)
+           (set-marker excursion-marker nil)
            (set-marker composable--start-point nil)))))
     (composable-range-mode -1))))
 
