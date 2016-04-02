@@ -212,3 +212,13 @@ Feature: composable
     3. line
 
     """
+
+  Scenario: Joining lines
+    When I insert:
+    """
+    foo
+      bar
+    """
+    And I place the cursor after "foo"
+    And I press "C-w j"
+    Then I should see "foobar"

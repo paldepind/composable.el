@@ -28,7 +28,7 @@
 
 (defvar composable--command)
 (defvar composable--skip-first)
-(defvar composable--prefix-arg)
+(defvar composable--prefix-arg nil)
 (defvar composable--start-point)
 (defvar composable--fn-pairs (make-hash-table :test 'equal))
 
@@ -65,6 +65,21 @@ For each function named foo a function name composable-foo is created."
      (point))
    nil t))
 
+(defun composable-mark-join (arg)
+  "Mark the whitespace seperating lines.
+Between the line above if ARG is negative otherwise below."
+  (interactive "p")
+  (forward-line arg)
+  (cl-flet ((move (dir)
+                  (funcall(if (< 0 dir)
+                              'skip-chars-forward
+                            'skip-chars-backward)
+                          "[:space:]\n")))
+    (when (< arg 0) (end-of-line))
+    (move arg)
+    (push-mark nil nil t)
+    (move (- arg))))
+
 (composable-def
  '(kill-region kill-ring-save indent-region comment-region
    smart-comment-region upcase-region))
@@ -95,7 +110,7 @@ For each function named foo a function name composable-foo is created."
     (composable--call-excursion command composable--start-point)))
 
 (defun composable--contain-marking (prefix)
-  "Remove marking befor or after point based on PREFIX."
+  "Remove marking before or after point based on PREFIX."
   (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max))
         (pos (marker-position composable--start-point)))
     (set-mark (funcall fn (mark) pos))
@@ -166,6 +181,7 @@ For each function named foo a function name composable-foo is created."
     ((kbd "u") . er/mark-url)
     ((kbd "r") . er/mark)
     ((kbd "g") . composable-keyboard-quit)
+    ((kbd "j") . composable-mark-join)
     ((kbd "C-g") . composable-keyboard-quit))
   (if composable-range-mode
       (progn
