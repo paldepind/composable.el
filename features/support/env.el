@@ -18,6 +18,7 @@
 
 (Setup
  ;; Before anything has run
+ (composable-mode)
  )
 
 (Before

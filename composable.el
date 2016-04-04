@@ -81,7 +81,7 @@ Between the line above if ARG is negative otherwise below."
     (move (- arg))))
 
 (composable-def
- '(kill-region kill-ring-save indent-region comment-region
+ '(kill-region kill-ring-save indent-region comment-or-uncomment-region
    smart-comment-region upcase-region))
 
 (defvar composable--activated-with-marking nil)
@@ -219,11 +219,16 @@ This also allows for leaving range mode by pressing \\[keyboard-quit]."
 
 (advice-add 'set-mark-command :after 'composable--set-mark-command-advice)
 
-(global-set-key (kbd "C-w") 'composable-kill-region)
-(global-set-key (kbd "M-w") 'composable-kill-ring-save)
-(global-set-key (kbd "C-M-\\") 'composable-indent-region)
-(global-set-key (kbd "M-;") 'composable-smart-comment-region)
-(global-set-key (kbd "C-x C-u") 'composable-upcase-region)
+(define-minor-mode composable-mode
+  "Toggle Composable mode."
+  :lighter " Composable"
+  :global 1
+  :keymap
+  `((,(kbd "C-w") . composable-kill-region)
+    (,(kbd "M-w") . composable-kill-ring-save)
+    (,(kbd "M-;") . composable-comment-or-uncomment-region)
+    (,(kbd "C-x C-u") . composable-upcase-region)
+    (,(kbd "C-M-\\") . composable-indent-region)))
 
 (provide 'composable)
 
