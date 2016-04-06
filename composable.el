@@ -34,7 +34,15 @@
 (defvar composable--start-point)
 (defvar composable--fn-pairs (make-hash-table :test 'equal))
 
-(defvar composable-repeat t) ;; TODO: make this a defcustom
+;;* Customization
+(defgroup composable nil
+  "Composable editing."
+  :prefix "composable-"
+  :group 'tools)
+
+(defcustom composable-repeat t
+  "Repeat the last excuted action by repressing the last key."
+  :type 'boolean)
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -45,7 +53,7 @@ specifies and call COMMAND on the region."
     (if mark-active
         (call-interactively command)
       (setq composable--command command)
-      (composable-range-mode))))
+      (composable-object-mode))))
 
 (defun composable-def (commands)
   "Define composable function from a list COMMANDS.
@@ -67,21 +75,21 @@ For each function named foo a function name composable-foo is created."
     (define-key map key def)
     map))
 
-(defun composable--call-excursion (command start-point)
-  "Call COMMAND if set then go to START-POINT."
+(defun composable--call-excursion (command point-mark)
+  "Call COMMAND if set then go to POINT-MARK marker."
   (when (commandp command)
     (call-interactively command)
-    (goto-char (marker-position composable--start-point))))
+    (goto-char (marker-position point-mark))))
 
-(defun composable--repeater (excursion-marker motion command)
-  "Preserve point at EXCURSION-MARKER when doing MOTION and COMMAND."
+(defun composable--repeater (point-marker motion command)
+  "Preserve point at POINT-MARKER when doing MOTION and COMMAND."
   (lambda ()
     (interactive)
-    (goto-char (marker-position excursion-marker))
+    (goto-char (marker-position point-marker))
     ;; Activate mark, some mark functions expands region when mark is active
     (set-mark (mark))
     (call-interactively motion)
-    (set-marker excursion-marker (point))
+    (set-marker point-marker (point))
     (composable--call-excursion command composable--start-point)))
 
 (defun composable--contain-marking (prefix)
@@ -92,7 +100,7 @@ For each function named foo a function name composable-foo is created."
     (goto-char (funcall fn (point) pos))))
 
 (defun composable--post-command-hook-handler ()
-  "Called after each command when composable-rangemode is on."
+  "Called after each command when composable-object-mode is on."
   (cond
    (composable--skip-first
     (setq composable--skip-first nil))
@@ -104,18 +112,18 @@ For each function named foo a function name composable-foo is created."
         (call-interactively (gethash this-command composable--fn-pairs)))
        (mark-active (composable--contain-marking composable--prefix-arg))))
     (let ((motion this-command)
-          (excursion-marker (point-marker)))
+          (point-marker (point-marker)))
       (composable--call-excursion composable--command composable--start-point)
       (when composable-repeat
         (set-transient-map
          (composable--singleton-map
           (vector last-command-event)
-          (composable--repeater excursion-marker motion composable--command))
+          (composable--repeater point-marker motion composable--command))
          t
          (lambda ()
-           (set-marker excursion-marker nil)
+           (set-marker point-marker nil)
            (set-marker composable--start-point nil)))))
-    (composable-range-mode -1))))
+    (composable-object-mode -1))))
 
 (defun composable-add-pair (fn1 fn2)
   "Take two commands FN1 and FN2 and add them as pairs."
@@ -124,9 +132,9 @@ For each function named foo a function name composable-foo is created."
 
 (composable-add-pair 'forward-word 'backward-word)
 
-(define-minor-mode composable-range-mode
+(define-minor-mode composable-object-mode
   "Composable mode."
-  :lighter "Range "
+  :lighter "Object "
   :keymap
   '(((kbd "e") . move-end-of-line)
     ((kbd "1") . digit-argument)
@@ -158,7 +166,7 @@ For each function named foo a function name composable-foo is created."
     ((kbd "g") . composable-keyboard-quit)
     ((kbd "j") . composable-mark-join)
     ((kbd "C-g") . composable-keyboard-quit))
-  (if composable-range-mode
+  (if composable-object-mode
       (progn
         (if (not mark-active) (push-mark nil t))
         (setq composable--start-point (point-marker))
@@ -171,9 +179,9 @@ For each function named foo a function name composable-foo is created."
 
 (defun composable--set-mark-command-advice (&rest _)
   "Advice for `set-mark-command'.  _ are ignored."
-  (unless composable-range-mode
+  (unless composable-object-mode
     (setq composable--activated-with-marking t)
-    (composable-range-mode)))
+    (composable-object-mode)))
 
 (defun composable-begin-argument ()
   "Set prefix argument to end."
@@ -186,9 +194,9 @@ For each function named foo a function name composable-foo is created."
   (setq composable--prefix-arg 'composable-end))
 
 (defun composable--deactivate-mark-hook-handler ()
-  "Leave range mode when the mark is disabled.
-This also allows for leaving range mode by pressing \\[keyboard-quit]."
-  (composable-range-mode -1))
+  "Leave object mode when the mark is disabled.
+This also allows for leaving object mode by pressing \\[keyboard-quit]."
+  (composable-object-mode -1))
 
 (add-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
 

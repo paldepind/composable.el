@@ -1,8 +1,13 @@
+* TODO Split files into core, mark and commands
+* TODO Figure out best way to select inner/outer stuff
+  Should probably use either smartparens or expand-region
+* TODO Proper docstring for composable commands
+* TODO Maybe replace pair feature with negation
+* DONE Marking function for joining lines
+  CLOSED: [2016-04-06 Wed 12:35]
 * DONE Mark stuff with C-SPC
   CLOSED: [2016-03-25 Fri 10:06]
 ** TODO Make sure it works with smartparens
-* TODO Figure out best way to select inner/outer stuff
-  Should probably use either smartparens or expand-region
 * DONE Prefixes
   CLOSED: [2016-03-30 Wed 18:45]
 ** DONE Convert symmetric movements to region
@@ -27,7 +32,5 @@
   CLOSED: [2016-03-25 Fri 10:06]
 * DONE Handle bindings spanning multiple keys
   CLOSED: [2016-03-25 Fri 10:07]
-* TODO Proper docstring for composable commands
 * Consider replacing minor mode with `set-transient-map`
 Probably not going to work.
-* TODO Marking function for joining lines

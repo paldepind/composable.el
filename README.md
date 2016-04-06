@@ -73,4 +73,24 @@ Place `composable.el` in your load path.
   (composable-mode))
 ```
 
-# Repeat
+# Usage
+
+# Documentation
+
+## The default bindings
+
+The default bindings overwrite the "non-composable" default bindings
+in Emacs. For instance `C-w` is bound to `composable-kill-region`
+instead of `kill-region`.
+
+| Binding  | Command                                  |
+| -------- | ---------------------------------------- |
+| C-w      | `composable-kill-region`                 |
+| M-w      | `composable-kill-ring-save`              |
+| M-;      | `composable-comment-or-uncomment-region` |
+| C-M-\\   | `composable-indent-region`               |
+| C-x C-u  | `composable-upcase-region`               |
+
+## The default object bindings
+
+## Repeat
