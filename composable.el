@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'composable-mark)
+
 (defvar composable--command)
 (defvar composable--skip-first)
 (defvar composable--prefix-arg nil)
@@ -52,33 +54,6 @@ For each function named foo a function name composable-foo is created."
   (dolist (c commands)
     (fset (intern (concat "composable-" (symbol-name c)))
           (composable-create-composable c))))
-
-(defun composable-mark-line (arg)
-  "Mark ARG lines."
-  (interactive "p")
-  (beginning-of-line)
-  (push-mark
-   (save-excursion
-     (when (region-active-p)
-       (goto-char (mark)))
-     (forward-line arg)
-     (point))
-   nil t))
-
-(defun composable-mark-join (arg)
-  "Mark the whitespace seperating lines.
-Between the line above if ARG is negative otherwise below."
-  (interactive "p")
-  (forward-line arg)
-  (cl-flet ((move (dir)
-                  (funcall(if (< 0 dir)
-                              'skip-chars-forward
-                            'skip-chars-backward)
-                          "[:space:]\n")))
-    (when (< arg 0) (end-of-line))
-    (move arg)
-    (push-mark nil nil t)
-    (move (- arg))))
 
 (composable-def
  '(kill-region kill-ring-save indent-region comment-or-uncomment-region
