@@ -119,54 +119,76 @@ Feature: composable
     And I press "a"
     Then I should see "first asecond third"
 
+  Scenario: Use beginning of region with prefix
+    When I insert "first second third"
+    And I place the cursor before "second"
+    And I start an action chain
+    And I press "C-w"
+    And I press ","
+    And I press "l"
+    And I execute the action chain
+    Then I should see pattern "^second third$"
+
   Scenario: Use end of region with prefix
     When I insert "first second third"
     And I place the cursor before " second"
+    And I start an action chain
     And I press "C-w"
     And I press "."
     And I press "l"
+    And I execute the action chain
     Then I should see pattern "^first$"
 
   Scenario: Killing word forward with symmetric command
     When I insert "first second third"
     And I place the cursor before "cond"
+    And I start an action chain
     And I press "C-w"
     And I press "."
     And I press "f"
+    And I execute the action chain
     Then I should see "first  third"
 
   Scenario: Kill word backward with symmetric command
     When I insert "first second third"
+    And I start an action chain
     And I place the cursor before "cond"
     And I press "C-w"
     And I press "."
     And I press "b"
+    And I execute the action chain
     Then I should see "first  third"
 
   Scenario: Mark word with symmetric command
     When I insert "first second third"
     And I place the cursor before "cond"
+    And I start an action chain
     And I press "C-SPC"
     And I press "."
     And I press "b"
+    And I execute the action chain
     Then the region should be "second"
 
   Scenario: Repeat killing of word
     When I insert "first second third fourth fifth"
     And I place the cursor before " second"
+    And I start an action chain
     And I press "C-w"
     And I press "f"
     And I press "f"
     And I press "f"
+    And I execute the action chain
     Then I should see "first fifth"
 
   Scenario: Repeat uppercasing backward word
     When I insert "first second third fourth fifth"
     And I place the cursor before "fifth"
+    And I start an action chain
     And I press "C-x C-u"
     And I press "b"
     And I press "b"
     And I press "b"
+    And I execute the action chain
     Then I should see "first SECOND THIRD FOURTH fifth"
 
   Scenario: Repeat uppercasing paragraph
@@ -181,10 +203,12 @@ Feature: composable
     Baz
     """
     And I place the cursor after "Fo"
+    And I start an action chain
     And I press "C-x C-u"
     And I press "h"
     And I press "h"
     And I press "h"
+    And I execute the action chain
     Then I should see:
     """
     FOO
@@ -222,3 +246,10 @@ Feature: composable
     And I place the cursor after "foo"
     And I press "C-w j"
     Then I should see "foobar"
+
+  Scenario: Executing action that does not move point
+    When I insert "foo bar"
+    And I place the cursor after "bar"
+    And I press "C-w e"
+    And I press "a"
+    Then I should see "foo bara"

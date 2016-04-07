@@ -99,12 +99,16 @@ For each function named foo a function name composable-foo is created."
     (set-mark (funcall fn (mark) pos))
     (goto-char (funcall fn (point) pos))))
 
+(defvar composable--arguments
+  '(universal-argument digit-argument negative-argument
+   composable-begin-argument composable-end-argument))
+
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-object-mode is on."
   (cond
    (composable--skip-first
     (setq composable--skip-first nil))
-   ((/= (point) (mark))
+   ((not (member this-command composable--arguments))
     (when composable--prefix-arg
       (cond
        ((gethash this-command composable--fn-pairs)
