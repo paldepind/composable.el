@@ -34,16 +34,16 @@
   :prefix "composable-"
   :group 'tools)
 
+(defcustom composable-repeat t
+  "Repeat the last excuted action by repressing the last key."
+  :type 'boolean)
+
 (defvar composable--command)
 (defvar composable--skip-first)
 (defvar composable--prefix-arg nil)
 (defvar composable--start-point)
 (defvar composable--fn-pairs (make-hash-table :test 'equal))
 (defvar composable--command-prefix nil)
-
-(defcustom composable-repeat t
-  "Repeat the last excuted action by repressing the last key."
-  :type 'boolean)
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -186,6 +186,7 @@ For each function named foo a function name composable-foo is created."
     ((kbd "C-g") . composable-object-mode))
   (if composable-object-mode
       (progn
+        (message "mode act")
         (if (not mark-active) (push-mark nil t))
         (setq composable--start-point (point-marker))
         (setq composable--skip-first t)
@@ -211,8 +212,7 @@ For each function named foo a function name composable-foo is created."
 
 (defun composable--set-mark-command-advice (&rest _)
   "Advice for `set-mark-command'.  _ is ignored."
-  (unless composable-object-mode
-    (composable-object-mode)))
+  (unless composable-object-mode (composable-object-mode)))
 
 (define-minor-mode composable-mark-mode
   "Toggle composable mark mode."
@@ -220,9 +220,9 @@ For each function named foo a function name composable-foo is created."
   (if composable-mode
       (progn
         (add-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
-        (advice-add 'set-mark-command :after 'composable--set-mark-command-advice))
+        (advice-add 'set-mark-command :before 'composable--set-mark-command-advice))
     (remove-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
-    (advice-remove 'set-mark-command :after 'composable--set-mark-command-advice)))
+    (advice-remove 'set-mark-command :before 'composable--set-mark-command-advice)))
 
 (provide 'composable)
 
