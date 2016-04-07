@@ -202,10 +202,6 @@ For each function named foo a function name composable-foo is created."
 This also allows for leaving object mode by pressing \\[keyboard-quit]."
   (composable-object-mode -1))
 
-(add-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
-
-(advice-add 'set-mark-command :after 'composable--set-mark-command-advice)
-
 (define-minor-mode composable-mode
   "Toggle Composable mode."
   :lighter " Composable"
@@ -215,7 +211,13 @@ This also allows for leaving object mode by pressing \\[keyboard-quit]."
     (,(kbd "M-w") . composable-kill-ring-save)
     (,(kbd "M-;") . composable-comment-or-uncomment-region)
     (,(kbd "C-x C-u") . composable-upcase-region)
-    (,(kbd "C-M-\\") . composable-indent-region)))
+    (,(kbd "C-M-\\") . composable-indent-region))
+  (if composable-mode
+      (progn
+        (add-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
+        (advice-add 'set-mark-command :after 'composable--set-mark-command-advice))
+    (remove-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
+    (advice-remove 'set-mark-command :after 'composable--set-mark-command-advice)))
 
 (provide 'composable)
 
