@@ -1,4 +1,5 @@
-* TODO Pass prefix arg along to wrapped command
+* DONE Pass prefix arg along to wrapped command
+  CLOSED: [2016-04-07 Thu 19:06]
 * TODO Split files into core, mark and commands
 * TODO Figure out best way to select inner/outer stuff
   Should probably use either smartparens or expand-region

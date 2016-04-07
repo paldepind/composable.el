@@ -27,6 +27,9 @@ Feature: composable
     And I press "C-w"
     Then I should see "foo baz"
 
+  Scenario: Pass prefix argument along to action
+    # Fixme
+
   Scenario: Deleting word
     When I insert "first second third fourth"
     And I place the cursor after "first"
