@@ -103,30 +103,36 @@ For each function named foo a function name composable-foo is created."
   '(universal-argument digit-argument negative-argument
    composable-begin-argument composable-end-argument))
 
+(defun composable--activate-repeat (motion point-marker)
+  "Activate repeat map that execute MOTION preserving point at POINT-MARKER."
+  (interactive)
+  (set-transient-map
+   (composable--singleton-map
+    (vector last-command-event)
+    (composable--repeater point-marker motion composable--command))
+   t
+   (lambda ()
+     (set-marker point-marker nil)
+     (set-marker composable--start-point nil))))
+
+(defun composable--handle-prefix (pair)
+  "Handle prefix arg where the command is paired with PAIR."
+  (interactive)
+  (cond
+   ((gethash this-command composable--fn-pairs)
+    (set-mark (point))
+    (call-interactively pair))
+   (mark-active (composable--contain-marking composable--prefix-arg))))
+
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-object-mode is on."
   (cond
    (composable--skip-first
     (setq composable--skip-first nil))
    ((not (member this-command composable--arguments))
-    (when composable--prefix-arg
-      (cond
-       ((gethash this-command composable--fn-pairs)
-        (set-mark (point))
-        (call-interactively (gethash this-command composable--fn-pairs)))
-       (mark-active (composable--contain-marking composable--prefix-arg))))
-    (let ((motion this-command)
-          (point-marker (point-marker)))
-      (composable--call-excursion composable--command composable--start-point)
-      (when composable-repeat
-        (set-transient-map
-         (composable--singleton-map
-          (vector last-command-event)
-          (composable--repeater point-marker motion composable--command))
-         t
-         (lambda ()
-           (set-marker point-marker nil)
-           (set-marker composable--start-point nil)))))
+    (when composable--prefix-arg (composable--handle-prefix (gethash this-command composable--fn-pairs)))
+    (when composable-repeat (composable--activate-repeat this-command (point-marker)))
+    (composable--call-excursion composable--command composable--start-point)
     (composable-object-mode -1))))
 
 (defun composable-add-pair (fn1 fn2)
