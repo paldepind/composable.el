@@ -1,8 +1,10 @@
+* TODO Pass prefix arg along to wrapped command
 * TODO Split files into core, mark and commands
 * TODO Figure out best way to select inner/outer stuff
   Should probably use either smartparens or expand-region
 * TODO Proper docstring for composable commands
-* TODO Maybe replace pair feature with negation
+* DONE Make minor mode optional
+  CLOSED: [2016-04-07 Thu 12:32]
 * DONE Marking function for joining lines
   CLOSED: [2016-04-06 Wed 12:35]
 * DONE Mark stuff with C-SPC

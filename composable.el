@@ -28,17 +28,17 @@
 
 (require 'composable-mark)
 
-(defvar composable--command)
-(defvar composable--skip-first)
-(defvar composable--prefix-arg nil)
-(defvar composable--start-point)
-(defvar composable--fn-pairs (make-hash-table :test 'equal))
-
 ;;* Customization
 (defgroup composable nil
   "Composable editing."
   :prefix "composable-"
   :group 'tools)
+
+(defvar composable--command)
+(defvar composable--skip-first)
+(defvar composable--prefix-arg nil)
+(defvar composable--start-point)
+(defvar composable--fn-pairs (make-hash-table :test 'equal))
 
 (defcustom composable-repeat t
   "Repeat the last excuted action by repressing the last key."
@@ -173,9 +173,9 @@ For each function named foo a function name composable-foo is created."
     ((kbd "m") . mark-sentence)
     ((kbd "u") . er/mark-url)
     ((kbd "r") . er/mark)
-    ((kbd "g") . composable-keyboard-quit)
     ((kbd "j") . composable-mark-join)
-    ((kbd "C-g") . composable-keyboard-quit))
+    ((kbd "g") . composable-object-mode)
+    ((kbd "C-g") . composable-object-mode))
   (if composable-object-mode
       (progn
         (if (not mark-active) (push-mark nil t))
@@ -203,11 +203,6 @@ For each function named foo a function name composable-foo is created."
   (interactive)
   (setq composable--prefix-arg 'composable-end))
 
-(defun composable--deactivate-mark-hook-handler ()
-  "Leave object mode when the mark is disabled.
-This also allows for leaving object mode by pressing \\[keyboard-quit]."
-  (composable-object-mode -1))
-
 (define-minor-mode composable-mode
   "Toggle Composable mode."
   :lighter " Composable"
@@ -217,7 +212,16 @@ This also allows for leaving object mode by pressing \\[keyboard-quit]."
     (,(kbd "M-w") . composable-kill-ring-save)
     (,(kbd "M-;") . composable-comment-or-uncomment-region)
     (,(kbd "C-x C-u") . composable-upcase-region)
-    (,(kbd "C-M-\\") . composable-indent-region))
+    (,(kbd "C-M-\\") . composable-indent-region)))
+
+(defun composable--deactivate-mark-hook-handler ()
+  "Leave object mode when the mark is disabled.
+This also allows for leaving object mode by pressing \\[keyboard-quit]."
+  (composable-object-mode -1))
+
+(define-minor-mode composable-mark-mode
+  "Toggle composable mark mode."
+  :global 1
   (if composable-mode
       (progn
         (add-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)

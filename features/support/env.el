@@ -19,6 +19,7 @@
 (Setup
  ;; Before anything has run
  (composable-mode)
+ (composable-mark-mode)
  )
 
 (Before
