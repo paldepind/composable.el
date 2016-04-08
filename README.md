@@ -1,5 +1,8 @@
 # composable.el
 
+[![Build Status](https://travis-ci.org/paldepind/composable.el.svg?branch=master)](https://travis-ci.org/paldepind/composable.el)
+[![Coverage Status](https://coveralls.io/repos/github/paldepind/composable.el/badge.svg?branch=master)](https://coveralls.io/github/paldepind/composable.el?branch=master)
+
 > Let there be composable editing!
 
 Composable text editing is vim's greatest feature. composable.el is
