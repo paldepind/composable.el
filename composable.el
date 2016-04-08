@@ -186,7 +186,6 @@ For each function named foo a function name composable-foo is created."
     ((kbd "C-g") . composable-object-mode))
   (if composable-object-mode
       (progn
-        (message "mode act")
         (if (not mark-active) (push-mark nil t))
         (setq composable--start-point (point-marker))
         (setq composable--skip-first t)
