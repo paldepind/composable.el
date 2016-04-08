@@ -11,7 +11,9 @@
 
 (add-to-list 'load-path composable-root-path)
 
-(message composable-root-path)
+(when (require 'undercover nil t)
+  (undercover "*.el"))
+
 (require 'composable)
 (require 'espuds)
 (require 'ert)
