@@ -5,16 +5,13 @@
 
 > Let there be composable editing!
 
-Composable text editing is vim's greatest feature. composable.el is
-composable text editing for Emacs.
+composable.el is composable text editing for Emacs. It improves the
+basic editing power of Emacs by making commands combineable.
 
-It improves the basic editing power
-of Emacs by making commands combineable.
-
-It's implemented in a way that reuses existing Emacs infrastructure.
-This makes it simple and compatible with existing Emacs functionality
-and concepts. composable.el only brings together existing features in
-a slightly different way.
+It's inspired by vim but implemented in a way that reuses existing
+Emacs infrastructure. This makes it simple and compatible with
+existing Emacs functionality and concepts. composable.el only brings
+together existing features in a slightly different way.
 
 ## Introduction
 
@@ -26,7 +23,7 @@ Thus `kill-region` and `comment-region` are actions. An object is
 specified by a command that moves point and optionally sets the mark
 as well. Examples are `move-end-of-line` and `mark-paragraph`.
 
-_Note for people familiar with vim:_ What composable.el calls an
+> _Note for people familiar with vim:_ What composable.el calls an
 action is called an operator in vim and the term object covers both
 motion and text object in vim.
 
@@ -45,10 +42,14 @@ Invoking it works like this:
 
 ## Features
 
-* Built out of plain Emacs concepts.
-* Object input bindings layer that makes selecting object easy and fast.
-* Easily repeat composable actions by repeating the final character
-  that selected the object.
+* Based on normal Emacs functionality and concepts.
+* [Object input bindings](#the-default-object-bindings) layer that
+  makes selecting object easy and fast.
+* [Easily repeat composable actions](#repeating) by repeating the
+  final character that selected the object.
+* Integration with the default mark command with
+  [composable mark mode](#composable-mark-mode).
+* Reuse bindings for several purposes with [prefix arguments](#prefix-arguments)
 
 ## Installation
 
@@ -149,7 +150,7 @@ Repeating is a feature that allows you to repeat the last action
 object combination by pressing the last key in the sequence
 repeatedly.
 
-For instance `C-w l l l` has the same effect as <kbd>C-w
+For instance <kbd>C-w l l l</kbd> has the same effect as <kbd>C-w
 l</kbd><kbd>C-w l</kbd><kbd>C-w l</kbd>. Repetition can also be
 combined with numeric prefixes. <kbd>C-w 10 l l l</kbd> kills 12
 lines.
@@ -166,10 +167,51 @@ is only active immediately after the mark has been set.
 (composable-mark-mode 1)
 ```
 
-## Prefix arguments with regions
+## Prefix arguments
 
-Undocumented.
+composable.el defines two prefix arguments `composable-begin-argument`
+and `composable-end-argument`. These modify how the chosen object is
+used.
 
-### Pairs
+The idea is that if you can mark a thing then you know both where the
+thing start and ends. Thus you can not only perform an action on the
+entire thing, but also from point to the begining or end of the thing.
 
-Undocumented.
+Similairly if you have have a pair of commands that move to the
+beginning and end of a thing you can use the two in unison to mark the
+entire thing.
+
+This makes it possible to use bindings in multiple ways. For instance
+if you often perform actions on an entire paragraph but rarely beform
+actions from point to the end of a paragraph.
+
+### With region commands
+
+Given a prefix argument before selecting a region command only the end
+or the beginning of the region will be used. I.e. instead of applying
+the action to the entire marked region only the region between point
+and the begining or end of region will be used.
+
+For instance <kbd>C-w . l</kbd> deletes to the end of the
+line—including the line break. This is because <kbd>l</kbd> marks the
+entire line but due to <kbd>.</kbd> only the end of the marked region
+is used.
+
+Similairly <kbd>C-w h</kbd> will kill one paragraph from beginning to
+end. But <kbd>C-w , h</kbd> will kill one paragraph backwards and
+<kbd>C-w . h</kbd> will kill one paragraph forward.
+
+### With pair movements
+
+With the function `composable-add-pair` you can define movement
+commands to be each others pair. For instance the following pair is
+defined by default.
+
+```lisp
+(composable-add-pair 'forward-word 'backward-word)
+```
+
+When a prefix argument is specified before a paired movement command
+(begin and end are treated the same) the two commands are used to
+establish a region. For instance <kbd>M-w , f</kbd> will save the
+current word to the kill ring.
