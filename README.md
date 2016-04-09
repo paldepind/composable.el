@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/paldepind/composable.el.svg?branch=master)](https://travis-ci.org/paldepind/composable.el)
 [![Coverage Status](https://coveralls.io/repos/github/paldepind/composable.el/badge.svg?branch=master)](https://coveralls.io/github/paldepind/composable.el?branch=master)
+[![MELPA](https://melpa.org/packages/composable-badge.svg)](https://melpa.org/#/composable)
 
 > Let there be composable editing!
 
