@@ -44,10 +44,10 @@ Between the line above if ARG is negative otherwise below."
   (interactive "p")
   (forward-line arg)
   (cl-flet ((move (dir)
-                  (funcall(if (< 0 dir)
-                              'skip-chars-forward
-                            'skip-chars-backward)
-                          "[:space:]\n")))
+                  (funcall (if (< 0 dir)
+                               'skip-chars-forward
+                             'skip-chars-backward)
+                           "[:space:]\n")))
     (when (< arg 0) (end-of-line))
     (move arg)
     (push-mark nil nil t)

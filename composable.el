@@ -205,6 +205,7 @@ For each function named foo a function name composable-foo is created."
     ((kbd "7") . digit-argument)
     ((kbd "8") . digit-argument)
     ((kbd "9") . digit-argument)
+    ((kbd "-") . negative-argument)
     ((kbd ".") . composable-end-argument)
     ((kbd ",") . composable-begin-argument)
     ((kbd "a") . move-beginning-of-line)
@@ -257,7 +258,7 @@ For each function named foo a function name composable-foo is created."
 (define-minor-mode composable-mark-mode
   "Toggle composable mark mode."
   :global 1
-  (if composable-mode
+  (if composable-mark-mode
       (progn
         (add-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
         (advice-add 'set-mark-command :before 'composable--set-mark-command-advice))

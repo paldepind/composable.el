@@ -20,13 +20,14 @@
 
 (Setup
  ;; Before anything has run
+ (message emacs-version)
  (composable-mode)
- (composable-mark-mode)
  )
 
 (Before
  ;; Before each scenario is run
  (transient-mark-mode 1)
+ (composable-mark-mode 1)
  )
 
 (After

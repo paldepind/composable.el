@@ -93,6 +93,25 @@ Feature: composable
       3. line
     """
 
+  Scenario: Kill line backwards
+    When I insert:
+    """
+    1. line
+    2. line
+    3. line
+    """
+    And I place the cursor after "2."
+    And I start an action chain
+    And I press "C-w"
+    And I press "-"
+    And I press "l"
+    And I execute the action chain
+    Then I should see:
+    """
+    2. line
+    3. line
+    """
+
   Scenario: Mark line
     When I insert:
     """
@@ -113,6 +132,15 @@ Feature: composable
     And I place the cursor before "second"
     And I press "C-SPC 3 f"
     Then the region should be "second third fourth"
+
+  Scenario: Disabling composable mark mode
+    When I insert "foo"
+    And I start an action chain
+    And I press "M-x"
+    And I type "composable-mark-mode"
+    And I execute the action chain
+    And I press "C-SPC f"
+    Then I should see "foof"
 
   Scenario: Cancel with C-g
     When I insert "first second third"
@@ -251,7 +279,7 @@ Feature: composable
 
     """
 
-  Scenario: Joining lines
+  Scenario: Joining line with line below
     When I insert:
     """
     foo
@@ -259,6 +287,16 @@ Feature: composable
     """
     And I place the cursor after "foo"
     And I press "C-w j"
+    Then I should see "foobar"
+
+  Scenario: Joining line with line above
+    When I insert:
+    """
+    foo
+      bar
+    """
+    And I place the cursor after "bar"
+    And I press "C-w - j"
     Then I should see "foobar"
 
   Scenario: Executing action that does not move point

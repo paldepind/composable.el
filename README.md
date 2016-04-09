@@ -11,7 +11,8 @@ basic editing power of Emacs by making commands combineable.
 It's inspired by vim but implemented in a way that reuses existing
 Emacs infrastructure. This makes it simple and compatible with
 existing Emacs functionality and concepts. composable.el only brings
-together existing features in a slightly different way.
+together existing features in a slightly different way that feels like
+a natural extension.
 
 ## Introduction
 
