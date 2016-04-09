@@ -122,8 +122,8 @@ For each function named foo a function name composable-foo is created."
     (set-marker point-marker (point))
     (composable--call-excursion command composable--start-point)))
 
-(defun composable--contain-marking (prefix)
-  "Remove marking before or after point based on PREFIX."
+(defun composable--contain-marking ()
+  "Remove marking before or after point based on prefix argument."
   (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max))
         (pos (marker-position composable--start-point)))
     (set-mark (funcall fn (mark) pos))
@@ -152,7 +152,7 @@ For each function named foo a function name composable-foo is created."
    ((gethash this-command composable--fn-pairs)
     (set-mark (point))
     (call-interactively pair))
-   (mark-active (composable--contain-marking composable--prefix-arg))))
+   (mark-active (composable--contain-marking))))
 
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-object-mode is on."
@@ -170,7 +170,17 @@ For each function named foo a function name composable-foo is created."
   (puthash fn2 fn1 composable--fn-pairs)
   (puthash fn1 fn2 composable--fn-pairs))
 
-(composable-add-pair 'forward-word 'backward-word)
+(defun composable-add-pairs (pairs)
+  "Add a list of PAIRS."
+  (dolist (p pairs)
+    (composable-add-pair (car p) (cadr p))))
+
+(composable-add-pairs
+ '((forward-word backward-word)
+   (move-end-of-line back-to-indentation)
+   (next-line previous-line)
+   (forward-paragraph backward-paragraph)
+   (forward-sentence backward-sentence)))
 
 (defun composable-begin-argument ()
   "Set prefix argument to end."
@@ -209,7 +219,7 @@ For each function named foo a function name composable-foo is created."
     ((kbd "s") . mark-sexp)
     ((kbd "w") . mark-word)
     ((kbd "h") . mark-paragraph)
-    ((kbd "m") . mark-sentence)
+    ((kbd "m") . back-to-indentation)
     ((kbd "j") . composable-mark-join)
     ((kbd "g") . composable-object-mode)
     ((kbd "C-g") . composable-object-mode))
@@ -223,6 +233,7 @@ For each function named foo a function name composable-foo is created."
     (setq composable--prefix-arg nil)
     (setq composable--command nil)))
 
+;;;###autoload
 (define-minor-mode composable-mode
   "Toggle Composable mode."
   :lighter " Composable"
@@ -242,6 +253,7 @@ For each function named foo a function name composable-foo is created."
   "Advice for `set-mark-command'.  _ is ignored."
   (unless composable-object-mode (composable-object-mode)))
 
+;;;###autoload
 (define-minor-mode composable-mark-mode
   "Toggle composable mark mode."
   :global 1

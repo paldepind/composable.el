@@ -147,7 +147,7 @@ Feature: composable
     And I place the cursor before "cond"
     And I start an action chain
     And I press "C-w"
-    And I press "."
+    And I press ","
     And I press "f"
     And I execute the action chain
     Then I should see "first  third"
@@ -161,6 +161,17 @@ Feature: composable
     And I press "b"
     And I execute the action chain
     Then I should see "first  third"
+
+  Scenario: Killing thing at indention with symmetric command
+    When I insert "  foo"
+    And I place the cursor before "oo"
+    And I start an action chain
+    And I press "C-w"
+    And I press ","
+    And I press "e"
+    And I execute the action chain
+    And I insert "bar"
+    Then I should see "  bar"
 
   Scenario: Mark word with symmetric command
     When I insert "first second third"

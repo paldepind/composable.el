@@ -53,7 +53,9 @@ Invoking it works like this:
 
 ## Installation
 
-Download `composable.el` and place it in your load path.
+Install through MELPA with `M-x package-install composable`.
+Alternatively, download `composable.el` and place it in your load
+path.
 
 ```
 (require 'composable)
@@ -210,6 +212,9 @@ defined by default.
 ```lisp
 (composable-add-pair 'forward-word 'backward-word)
 ```
+
+Alternatively multiple several pairs can be defined with
+`composable-add-pairs`.
 
 When a prefix argument is specified before a paired movement command
 (begin and end are treated the same) the two commands are used to
