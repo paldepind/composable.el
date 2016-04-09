@@ -262,7 +262,7 @@ For each function named foo a function name composable-foo is created."
         (add-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
         (advice-add 'set-mark-command :before 'composable--set-mark-command-advice))
     (remove-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
-    (advice-remove 'set-mark-command :before 'composable--set-mark-command-advice)))
+    (advice-remove 'set-mark-command 'composable--set-mark-command-advice)))
 
 (provide 'composable)
 
