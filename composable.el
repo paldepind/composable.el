@@ -76,7 +76,7 @@
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
-The returned function will ask for a motion, mark the region it
+The returned function will ask for an object, mark the region it
 specifies and call COMMAND on the region."
   (lambda (arg)
     (interactive "P")
@@ -111,16 +111,22 @@ For each function named foo a function name composable-foo is created."
       (call-interactively command))
     (goto-char (marker-position point-mark))))
 
-(defun composable--repeater (point-marker motion command)
-  "Preserve point at POINT-MARKER when doing MOTION and COMMAND."
+(defun composable--repeater (point-marker command object direction)
+  "Preserve point at POINT-MARKER when doing COMMAND on OBJECT in DIRECTION."
   (lambda ()
     (interactive)
     (goto-char (marker-position point-marker))
     ;; Activate mark, some mark functions expands region when mark is active
     (set-mark (mark))
-    (call-interactively motion)
+    (let ((current-prefix-arg direction))
+      (call-interactively object))
     (set-marker point-marker (point))
     (composable--call-excursion command composable--start-point)))
+
+(defun composable--direction (arg)
+  "Direction of ARG."
+  (let ((n (prefix-numeric-value arg)))
+    (if n (/ n (abs n)) 1)))
 
 (defun composable--contain-marking ()
   "Remove marking before or after point based on prefix argument."
@@ -133,13 +139,13 @@ For each function named foo a function name composable-foo is created."
   '(universal-argument digit-argument negative-argument
    composable-begin-argument composable-end-argument))
 
-(defun composable--activate-repeat (motion point-marker)
-  "Activate repeat map that execute MOTION preserving point at POINT-MARKER."
+(defun composable--activate-repeat (object point-marker)
+  "Activate repeat map on OBJECT preserving point at POINT-MARKER."
   (interactive)
   (set-transient-map
    (composable--singleton-map
     (vector last-command-event)
-    (composable--repeater point-marker motion composable--command))
+    (composable--repeater point-marker composable--command object (composable--direction last-prefix-arg)))
    t
    (lambda ()
      (set-marker point-marker nil)
