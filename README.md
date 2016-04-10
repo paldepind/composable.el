@@ -6,14 +6,21 @@
 
 > Let there be composable editing!
 
-composable.el is composable text editing for Emacs. It improves the
+composable.el brings composable text editing to Emacs. It improves the
 basic editing power of Emacs by making commands combineable.
 
 It's inspired by vim but implemented in a way that reuses existing
-Emacs infrastructure. This makes it simple and compatible with
-existing Emacs functionality and concepts. composable.el only brings
-together existing features in a slightly different way that feels like
-a natural extension.
+Emacs concepts. This makes it simple and compatible with existing
+Emacs functionality and infrastructure. composable.el brings together
+existing features in a more powerful way.
+
+*Note:* composable.el is in early stages. It has a healthy amount of
+features already but I am very open to ideas for additions. That as
+well as feedback on the documentation and implementation is greatly
+appreciated. I am aware that some people in the Emacs community are
+skeptical towards composable editing. There is more to say about the
+topic than this readme does. I'll probably write about that at some
+point.
 
 ## Introduction
 
@@ -42,6 +49,16 @@ Invoking it works like this:
 3. After the object has been entered the action is invoked on the
    specified object.
 
+## Benefits
+
+One of the primary benefits of composable editing is that actions and
+objects are _orthogonal_. When you learn a new motion you can apply
+all existing actions to it and vice versa. Thus is you use 4 actions
+and 8 objects you only need to remember 4+8=12 bindings instead of
+4*8=32 bindings. As an additional benefits only actions needs to be
+always accessible, object can be bound only on the object layer. Thus
+you can get away with only 4 regular bindings instead of 32.
+
 ## Features
 
 * Based on normal Emacs functionality and concepts.
@@ -68,12 +85,11 @@ path.
 # Basic usage
 
 composable.el ships with a default set of keybindings. These are
-activated by `composable-mark-mode`. Using `composable-mark-mode` is
-optional—it contains nothing but bindings. The mode overwrites a bunch
-of default Emacs bindings with composable variants. For instance
-<kbd>C-w</kbd> is bound to `composable-kill-region`. Invocations must
-be proceeded by an object. For instance <kbd>C-w C-e</kbd> kill to end
-of line.
+activated by `composable-mode`. Using `composable-mode` is optional—it
+contains nothing but bindings. The mode overwrites a bunch of default
+Emacs bindings with composable variants. For instance <kbd>C-w</kbd>
+is bound to `composable-kill-region`. Invocations must be proceeded by
+an object. For instance <kbd>C-w C-e</kbd> kill to end of line.
 
 Here are a few examples of usage. Refer to the tables with key
 bindings below to see the entire set of default commands.
@@ -99,6 +115,7 @@ instead of `kill-region`.
 | <kbd>M-;</kbd>     | `composable-comment-or-uncomment-region` |
 | <kbd>C-M-\\</kbd>  | `composable-indent-region`     |
 | <kbd>C-x C-u</kbd> | `composable-upcase-region`     |
+| <kbd>C-x C-l</kbd> | `composable-downcase-region`     |
 
 ## The default object bindings
 
@@ -130,7 +147,7 @@ Besides the bindings mentioned below 0-9 are bound to
 | <kbd>s</kbd> | `mark-sexp` |
 | <kbd>w</kbd> | `mark-word` |
 | <kbd>h</kbd> | `mark-paragraph` |
-| <kbd>m</kbd> | `mark-sentence` |
+| <kbd>m</kbd> | `back-to-indentation` |
 | <kbd>j</kbd> | `composable-mark-join` |
 | <kbd>g</kbd> | Leave composable-obect-mode |
 | <kbd>C-g</kbd> | Leave composable-obect-mode |

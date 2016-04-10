@@ -96,7 +96,7 @@ For each function named foo a function name composable-foo is created."
 
 (composable-def
  '(kill-region kill-ring-save indent-region comment-or-uncomment-region
-   smart-comment-region upcase-region))
+   smart-comment-region upcase-region downcase-region))
 
 (defun composable--singleton-map (key def)
   "Create a map with a single KEY with definition DEF."
@@ -244,6 +244,7 @@ For each function named foo a function name composable-foo is created."
     (,(kbd "M-w") . composable-kill-ring-save)
     (,(kbd "M-;") . composable-comment-or-uncomment-region)
     (,(kbd "C-x C-u") . composable-upcase-region)
+    (,(kbd "C-x C-l") . composable-downcase-region)
     (,(kbd "C-M-\\") . composable-indent-region)))
 
 (defun composable--deactivate-mark-hook-handler ()
