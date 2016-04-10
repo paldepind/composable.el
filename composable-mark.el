@@ -53,6 +53,22 @@ Between the line above if ARG is negative otherwise below."
     (push-mark nil nil t)
     (move (- arg))))
 
+(defun composable-mark-word (arg)
+  "Mark ARG words.
+Supports negative arguments and repeating."
+  (interactive "P")
+  (let* ((words (if arg (prefix-numeric-value arg)
+                  (if (< (mark) (point)) -1 1)))
+         (dir (/ words (abs words))))
+    (when (not (region-active-p))
+      (backward-word dir))
+    (push-mark
+     (save-excursion
+       (when (region-active-p)
+         (goto-char (mark)))
+       (forward-word words)
+       (point))
+     nil t)))
 
 (provide 'composable-mark)
 

@@ -30,7 +30,7 @@ Feature: composable
   Scenario: Pass prefix argument along to action
     # Fixme
 
-  Scenario: Deleting word
+  Scenario: Deleting word with forward word
     When I insert "first second third fourth"
     And I place the cursor after "first"
     And I press "C-w f"
@@ -305,3 +305,21 @@ Feature: composable
     And I press "C-w e"
     And I press "a"
     Then I should see "foo bara"
+
+  Scenario: Kill a word
+    When I insert "first second third fourth"
+    And I place the cursor after "sec"
+    And I press "C-w w"
+    Then I should see "first  third fourth"
+
+  Scenario: Kill a several words with repeat
+    When I insert "first second third fourth"
+    And I place the cursor after "fi"
+    And I press "C-w 2 w w"
+    Then I should see pattern "^ fourth$"
+
+  Scenario: Kill a several words with repeat backwards
+    When I insert "first second third fourth fifth"
+    And I place the cursor after "four"
+    And I press "C-w - w w w"
+    Then I should see pattern "^first  fifth$"
