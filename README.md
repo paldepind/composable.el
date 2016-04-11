@@ -146,6 +146,7 @@ Besides the bindings mentioned below 0-9 are bound to
 | <kbd>}</kbd> | `forward-paragraph` |
 | <kbd>s</kbd> | `mark-sexp` |
 | <kbd>w</kbd> | `mark-word` |
+| <kbd>y</kbd> | `composable-mark-symbol` |
 | <kbd>h</kbd> | `mark-paragraph` |
 | <kbd>m</kbd> | `back-to-indentation` |
 | <kbd>j</kbd> | `composable-mark-join` |

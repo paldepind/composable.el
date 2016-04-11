@@ -53,22 +53,33 @@ Between the line above if ARG is negative otherwise below."
     (push-mark nil nil t)
     (move (- arg))))
 
-(defun composable-mark-word (arg)
-  "Mark ARG words.
-Supports negative arguments and repeating."
-  (interactive "P")
-  (let* ((words (if arg (prefix-numeric-value arg)
+(defun composable--mark-with-forward (forward arg)
+  "Mark a region based on a FORWARD movement and ARG.
+The movement must move backwards with negative arguments."
+  (let* ((amount (if arg (prefix-numeric-value arg)
                   (if (< (mark) (point)) -1 1)))
-         (dir (/ words (abs words))))
+         (dir (/ amount (abs amount))))
     (when (not (region-active-p))
-      (backward-word dir))
+      (funcall forward (- dir)))
     (push-mark
      (save-excursion
        (when (region-active-p)
          (goto-char (mark)))
-       (forward-word words)
+       (funcall forward amount)
        (point))
      nil t)))
+
+(defun composable-mark-word (arg)
+  "Mark ARG words.
+Supports negative arguments and repeating."
+  (interactive "P")
+  (composable--mark-with-forward 'forward-word arg))
+
+(defun composable-mark-symbol (arg)
+  "Mark ARG symbols.
+Supports negative arguments and repeating."
+  (interactive "P")
+  (composable--mark-with-forward 'forward-symbol arg))
 
 (provide 'composable-mark)
 

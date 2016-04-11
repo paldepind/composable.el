@@ -225,6 +225,7 @@ For each function named foo a function name composable-foo is created."
     ((kbd "}") . forward-paragraph)
     ((kbd "s") . mark-sexp)
     ((kbd "w") . composable-mark-word)
+    ((kbd "y") . composable-mark-symbol)
     ((kbd "h") . mark-paragraph)
     ((kbd "m") . back-to-indentation)
     ((kbd "j") . composable-mark-join)

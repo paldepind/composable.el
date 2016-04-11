@@ -312,14 +312,33 @@ Feature: composable
     And I press "C-w w"
     Then I should see "first  third fourth"
 
-  Scenario: Kill a several words with repeat
+  Scenario: Kill several words with repeat
     When I insert "first second third fourth"
     And I place the cursor after "fi"
     And I press "C-w 2 w w"
     Then I should see pattern "^ fourth$"
 
-  Scenario: Kill a several words with repeat backwards
+  Scenario: Kill several words with repeat backwards
     When I insert "first second third fourth fifth"
     And I place the cursor after "four"
     And I press "C-w - w w w"
     Then I should see pattern "^first  fifth$"
+
+  Scenario: Kill a symbol
+    When I insert "(first-symbol second third_symbol fourth)"
+    And I place the cursor after "thir"
+    And I press "C-w y"
+    Then I should see "(first-symbol second  fourth)"
+
+  Scenario: Kill several symbols with repeat
+    When I insert "(first-symbol second third_symbol fourth)"
+    And I place the cursor after "fi"
+    And I press "C-w 2 y y"
+    Then I should see "( fourth)"
+
+  Scenario: Kill several symbols with repeat backwards
+    When I insert "(first second third_symbol &fourth fifth)"
+    And I place the cursor after "four"
+    And I press "C-w - y y y"
+    Then I should see "(first  fifth)"
+
