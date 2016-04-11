@@ -53,9 +53,9 @@ Invoking it works like this:
 
 One of the primary benefits of composable editing is that actions and
 objects are _orthogonal_. When you learn a new motion you can apply
-all existing actions to it and vice versa. Thus is you use 4 actions
+all existing actions to it and vice versa. Thus if you use 4 actions
 and 8 objects you only need to remember 4+8=12 bindings instead of
-4*8=32 bindings. As an additional benefits only actions needs to be
+4*8=32 bindings. As an additional benefit only actions need to be
 always accessible, object can be bound only on the object layer. Thus
 you can get away with only 4 regular bindings instead of 32.
 
@@ -85,7 +85,7 @@ path.
 # Basic usage
 
 composable.el ships with a default set of keybindings. These are
-activated by `composable-mode`. Using `composable-mode` is optional—it
+activated by `composable-mode`. Using `composable-mode` is optional, it
 contains nothing but bindings. The mode overwrites a bunch of default
 Emacs bindings with composable variants. For instance <kbd>C-w</kbd>
 is bound to `composable-kill-region`. Invocations must be proceeded by
