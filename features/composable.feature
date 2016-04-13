@@ -330,6 +330,12 @@ Feature: composable
     And I press "C-w y"
     Then I should see "(first-symbol second  fourth)"
 
+  Scenario: Kill symbol at beginning
+    When I insert "(first-symbol second third_symbol fourth)"
+    And I place the cursor before "third"
+    And I press "C-w y"
+    Then I should see "(first-symbol second  fourth)"
+
   Scenario: Kill several symbols with repeat
     When I insert "(first-symbol second third_symbol fourth)"
     And I place the cursor after "fi"

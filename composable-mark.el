@@ -60,6 +60,7 @@ The movement must move backwards with negative arguments."
                   (if (< (mark) (point)) -1 1)))
          (dir (/ amount (abs amount))))
     (when (not (region-active-p))
+      (funcall forward dir)
       (funcall forward (- dir)))
     (push-mark
      (save-excursion
