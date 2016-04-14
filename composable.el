@@ -68,12 +68,18 @@
   "Repeat the last excuted action by repressing the last key."
   :type 'boolean)
 
+(defcustom composable-object-cursor composable-half-cursor
+  "Use a custom face for the cursor when in object mode.
+This can be either a function or any value accepted by
+`cursor-type'.")
+
 (defvar composable--command)
 (defvar composable--skip-first)
 (defvar composable--prefix-arg nil)
 (defvar composable--start-point)
 (defvar composable--fn-pairs (make-hash-table :test 'equal))
 (defvar composable--command-prefix nil)
+(defvar composable--saved-cursor nil)
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -98,6 +104,15 @@ For each function named foo a function name composable-foo is created."
 (composable-def
  '(kill-region kill-ring-save indent-region comment-or-uncomment-region
    smart-comment-region upcase-region downcase-region))
+
+(defun composable-half-cursor ()
+  "Change cursor to a half-height box."
+  (let ((height (/ (window-pixel-height) (* (window-height) 2))))
+    (setq cursor-type (cons 'hbar height))))
+
+(defun composable--set-cursor (c)
+  "Set cursor to C"
+  (when c (setq cursor-type (if (functionp c) (funcall c) c))))
 
 (defun composable--singleton-map (key def)
   "Create a map with a single KEY with definition DEF."
@@ -234,10 +249,13 @@ For each function named foo a function name composable-foo is created."
     ((kbd "C-g") . composable-object-mode))
   (if composable-object-mode
       (progn
+        (setq composable--saved-cursor cursor-type)
+        (composable--set-cursor composable-object-cursor)
         (if (not mark-active) (push-mark nil t))
         (setq composable--start-point (point-marker))
         (setq composable--skip-first t)
         (add-hook 'post-command-hook 'composable--post-command-hook-handler))
+    (setq cursor-type composable--saved-cursor)
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil)
     (setq composable--command nil)))
