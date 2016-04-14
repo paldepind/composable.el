@@ -174,14 +174,11 @@ For each function named foo a function name composable-foo is created."
      (set-marker point-marker nil)
      (set-marker composable--start-point nil))))
 
-(defun composable--handle-prefix (pair)
-  "Handle prefix arg where the command is paired with PAIR."
-  (interactive)
-  (cond
-   ((gethash this-command composable--fn-pairs)
-    (set-mark (point))
-    (call-interactively pair))
-   (mark-active (composable--contain-marking))))
+(defun composable--handle-prefix (command pairs)
+  "Handle prefix arg where the COMMAND is paired in PAIRS."
+  (let ((pair (gethash command pairs)))
+    (cond (pair (set-mark (point)) (call-interactively pair))
+          (mark-active (composable--contain-marking)))))
 
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-object-mode is on."
@@ -189,7 +186,7 @@ For each function named foo a function name composable-foo is created."
    (composable--skip-first
     (setq composable--skip-first nil))
    ((not (member this-command composable--arguments))
-    (when composable--prefix-arg (composable--handle-prefix (gethash this-command composable--fn-pairs)))
+    (when composable--prefix-arg (composable--handle-prefix this-command composable--fn-pairs))
     (when composable-repeat (composable--activate-repeat this-command (point-marker)))
     (composable--call-excursion composable--command composable--start-point)
     (composable-object-mode -1))))
