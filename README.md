@@ -150,8 +150,8 @@ Besides the bindings mentioned below 0-9 are bound to
 | <kbd>h</kbd> | `mark-paragraph` |
 | <kbd>m</kbd> | `back-to-indentation` |
 | <kbd>j</kbd> | `composable-mark-join` |
-| <kbd>g</kbd> | Leave composable-obect-mode |
-| <kbd>C-g</kbd> | Leave composable-obect-mode |
+| <kbd>g</kbd> | Leave composable-object-mode |
+| <kbd>C-g</kbd> | Leave composable-object-mode |
 
 ## Create custom composable command
 
