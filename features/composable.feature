@@ -79,6 +79,32 @@ Feature: composable
       3. line
     """
 
+  Scenario: Kill line by repeating action
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "2."
+    And I press "C-w C-w"
+    Then I should see:
+    """
+      1. line
+      3. line
+    """
+
+  Scenario: Kill several lines by repeating action
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "2."
+    And I press "C-w C-w C-w"
+    Then I should not see "3. line"
+
   Scenario: Kill several lines
     When I insert:
     """

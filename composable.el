@@ -73,6 +73,9 @@
 This can be either a function or any value accepted by
 `cursor-type'.")
 
+(defcustom composable-twice-mark 'composable-mark-line
+  "Thing to mark when a composable command is called twice successively.")
+
 (defvar composable--command)
 (defvar composable--skip-first)
 (defvar composable--prefix-arg nil)
@@ -87,11 +90,15 @@ The returned function will ask for an object, mark the region it
 specifies and call COMMAND on the region."
   (lambda (arg)
     (interactive "P")
-    (if mark-active
-        (call-interactively command)
-      (setq composable--command-prefix arg)
-      (setq composable--command command)
-      (composable-object-mode))))
+    (cond (mark-active
+           (call-interactively command))
+          (composable-object-mode
+           (setq this-command composable-twice-mark)
+           (funcall composable-twice-mark arg))
+          (t
+           (setq composable--command-prefix arg)
+           (setq composable--command command)
+           (composable-object-mode)))))
 
 (defun composable-def (commands)
   "Define composable function from a list COMMANDS.

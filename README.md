@@ -100,6 +100,9 @@ bindings below to see the entire set of default commands.
 * <kbd>M-; s</kbd>: Comment structured expression.
 * <kbd>C-M-\\ h h</kbd>: Reindent the current paragraph and the next.
   The last <kbd>h</kbd> [repeats](#repeating) the action and object.
+* <kbd>C-w C-w</kbd>: Kill the current line by. Lines are selected by
+  calling the same composable action
+  [twice in a row](#successively-calling-a-composable-command).
 
 # Documentation
 
@@ -189,6 +192,14 @@ is only active immediately after the mark has been set.
 ```lisp
 (composable-mark-mode 1)
 ```
+
+## Successively calling a composable command
+
+When a composable command is called twice in a row, then the action is
+executed on the region specified by `composable-twice-mark`. By
+default this is `composable-mark-line`. Thus by default <kbd>C-w
+C-w</kbd> kills one line. This works with repetition as well. For
+instance <kbd>C-w C-w C-w</kbd> kills two lines.
 
 ## Prefix arguments
 
