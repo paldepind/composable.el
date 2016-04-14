@@ -68,7 +68,7 @@
   "Repeat the last excuted action by repressing the last key."
   :type 'boolean)
 
-(defcustom composable-object-cursor composable-half-cursor
+(defcustom composable-object-cursor 'composable-half-cursor
   "Use a custom face for the cursor when in object mode.
 This can be either a function or any value accepted by
 `cursor-type'.")
