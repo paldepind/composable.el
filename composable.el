@@ -279,7 +279,7 @@ For each function named foo a function name composable-foo is created."
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave object mode when the mark is disabled."
-  (composable-object-mode -1))
+  (when composable-object-mode (composable-object-mode -1)))
 
 (defun composable--set-mark-command-advice (&rest _)
   "Advice for `set-mark-command'.  _ is ignored."
