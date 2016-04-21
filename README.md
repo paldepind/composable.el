@@ -23,6 +23,25 @@ skeptical towards composable editing. There is more to say about the
 topic than this readme does. I'll probably write about that at some
 point.
 
+Here are a few examples of usage. Refer to the tables with key
+bindings below to see the entire set of default commands.
+
+* <kbd>C-w l</kbd>: Kill current line.
+* <kbd>M-w 3 f</kbd>: Save 3 words to the kill ring.
+* <kbd>M-; s</kbd>: Comment structured expression.
+* <kbd>C-M-\\ h h</kbd>: Reindent the current paragraph and the next.
+  The last <kbd>h</kbd> [repeats](#repeating) the action and object.
+* <kbd>C-w C-w</kbd>: Kill the current line by. Lines are selected by
+  calling the same composable action
+  [twice in a row](#successively-calling-a-composable-command).
+
+composable.el ships with a default set of keybindings. These are
+activated by `composable-mode`. Using `composable-mode` is optional, it
+contains nothing but bindings. The mode overwrites a bunch of default
+Emacs bindings with composable variants. For instance <kbd>C-w</kbd>
+is bound to `composable-kill-region`. Invocations must be proceeded by
+an object. For instance <kbd>C-w C-e</kbd> kill to end of line.
+
 ## Introduction
 
 Composable editing is a simple abstraction that makes it possible to
@@ -83,27 +102,6 @@ path.
 (composable-mark-mode) ; Use composable with C-SPC
 ```
 
-# Basic usage
-
-composable.el ships with a default set of keybindings. These are
-activated by `composable-mode`. Using `composable-mode` is optional, it
-contains nothing but bindings. The mode overwrites a bunch of default
-Emacs bindings with composable variants. For instance <kbd>C-w</kbd>
-is bound to `composable-kill-region`. Invocations must be proceeded by
-an object. For instance <kbd>C-w C-e</kbd> kill to end of line.
-
-Here are a few examples of usage. Refer to the tables with key
-bindings below to see the entire set of default commands.
-
-* <kbd>C-w l</kbd>: Kill current line.
-* <kbd>M-w 3 f</kbd>: Save 3 words to the kill ring.
-* <kbd>M-; s</kbd>: Comment structured expression.
-* <kbd>C-M-\\ h h</kbd>: Reindent the current paragraph and the next.
-  The last <kbd>h</kbd> [repeats](#repeating) the action and object.
-* <kbd>C-w C-w</kbd>: Kill the current line by. Lines are selected by
-  calling the same composable action
-  [twice in a row](#successively-calling-a-composable-command).
-
 # Documentation
 
 ## The default bindings
@@ -138,8 +136,8 @@ Besides the bindings mentioned below 0-9 are bound to
 
 | Binding      | Command                   |
 | ------------ | ------------------------- |
-| <kbd>.</kbd> | `composable-end-argument` |
-| <kbd>,</kbd> | `composable-begin-argument` |
+| <kbd>.</kbd> | `composable-end-argument` (discussed below) |
+| <kbd>,</kbd> | `composable-begin-argument` (discussed below) |
 | <kbd>a</kbd> | `move-beginning-of-line` |
 | <kbd>f</kbd> | `forward-word` |
 | <kbd>b</kbd> | `backward-word` |
@@ -159,16 +157,16 @@ Besides the bindings mentioned below 0-9 are bound to
 
 ## Create custom composable command
 
-Custom composable commands can be created with `composable-def`. The
-function must be passed a list of actions (commands that operate on
-the region).
+Suppose you have a function `rename-variable-region` that replaces all occurrences of a variable
+name in the region by another name; you can make it composable by using the function `composable-def`. The
+function must be passed a list of actions (commands that operate on the region):
 
 ```lisp
-(composable-def '(foo bar baz))
+(composable-def '(rename-variable-region))
 ```
 
-The above example will define the composable commands
-`composable-foo`, `composable-bar` and `composable-baz`.
+The above example will define the composable command
+`composable-rename-variable-region`.
 
 ## Repeating
 
@@ -250,5 +248,5 @@ Alternatively multiple several pairs can be defined with
 
 When a prefix argument is specified before a paired movement command
 (begin and end are treated the same) the two commands are used to
-establish a region. For instance <kbd>M-w , f</kbd> will save the
+establish a region. For instance both <kbd>M-w , f</kbd> and <kbd>M-w . f</kbd> will save the
 current word to the kill ring.
