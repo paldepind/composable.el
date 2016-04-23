@@ -1,4 +1,5 @@
-* Repeat to mark line
+* DONE Repeat to mark line
+  CLOSED: [2016-04-23 Sat 23:00]
 * Add something for raising
 * Add composable replace
 * Support transpose

@@ -88,7 +88,8 @@ you can get away with only 4 regular bindings instead of 32.
   final character that selected the object.
 * Integration with the default mark command with
   [composable mark mode](#composable-mark-mode).
-* Reuse bindings for several purposes with [prefix arguments](#prefix-arguments)
+* Reuse bindings for several purposes with
+  [prefix arguments](#prefix-arguments)
 
 ## Installation
 
@@ -102,6 +103,31 @@ path.
 (composable-mark-mode) ; Use composable with C-SPC
 ```
 
+<<<<<<< 6b6e56322ec5b2ae27d4a4c38b7b9df44718231c
+=======
+# Basic usage
+
+composable.el ships with a default set of keybindings. These are
+activated by `composable-mode`. Using `composable-mode` is optional, it
+contains nothing but bindings. The mode overwrites a bunch of default
+Emacs bindings with composable variants. For instance <kbd>C-w</kbd>
+is bound to `composable-kill-region`. Invocations must be proceeded by
+an object. For instance <kbd>C-w C-e</kbd> kill to end of line.
+
+Here are a few examples of usage. Refer to the tables with key
+bindings below to see the entire set of default commands.
+
+* <kbd>C-w l</kbd>: Kill current line.
+* <kbd>M-w 3 f</kbd>: Save 3 words to the kill ring.
+* <kbd>M-; s</kbd>: Comment structured expression.
+* <kbd>C-M-\\ h h</kbd>: Reindent the current paragraph and the next.
+  The last <kbd>h</kbd> [repeats](#repeating) the action and object.
+* <kbd>C-w C-w</kbd>: Kill the current line. Lines can be selected by
+  calling the same composable action
+  [twice in a row](#successively-calling-a-composable-command).
+* <kbd>C-SPC m</kbd>: Mark back to indentation.
+
+>>>>>>> Improve documentation on marking #8
 # Documentation
 
 ## The default bindings
@@ -183,13 +209,26 @@ The feature can be disabled by setting `composable-repeat` to `nil`.
 
 ## Composable Mark mode
 
-Composable mark mode activates the object bindings when the mark is
-activated by pressing <kbd>C-SPC</kbd>(`set-mark-command`). The layer
-is only active immediately after the mark has been set.
+Composable mark mode activates the
+[object bindings](#the-default-object-bindings) when the mark is
+activated with <kbd>C-SPC</kbd>(`set-mark-command`).
 
 ```lisp
 (composable-mark-mode 1)
 ```
+
+This makes it possible to mark things easily using the object
+bindings. A few examples:
+
+* <kbd>C-SPC l</kbd>: Mark line
+* <kbd>C-SPC y</kbd>: Mark symbol
+
+The layer is only active immediately after the mark has been set. This
+insures that `composable-mark-mode` does not interfere with
+`delete-selection-mode`. One can for instance perform <kbd>C-SPC l
+h</kbd>. The <kbd>l</kbd> will select a line but after that the object
+bindings will be turned of and the subsequent <kbd>h</kbd> will be a
+self-insertion.
 
 ## Successively calling a composable command
 
