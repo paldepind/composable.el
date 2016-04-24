@@ -103,8 +103,6 @@ path.
 (composable-mark-mode) ; Use composable with C-SPC
 ```
 
-<<<<<<< 6b6e56322ec5b2ae27d4a4c38b7b9df44718231c
-=======
 # Basic usage
 
 composable.el ships with a default set of keybindings. These are
@@ -127,7 +125,6 @@ bindings below to see the entire set of default commands.
   [twice in a row](#successively-calling-a-composable-command).
 * <kbd>C-SPC m</kbd>: Mark back to indentation.
 
->>>>>>> Improve documentation on marking #8
 # Documentation
 
 ## The default bindings
