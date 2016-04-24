@@ -76,6 +76,9 @@ This can be either a function or any value accepted by
 (defcustom composable-twice-mark 'composable-mark-line
   "Thing to mark when a composable command is called twice successively.")
 
+(defface easy-kill-selection '((t (:inherit secondary-selection)))
+  "Faced used to highlight kill candidate.")
+
 (defvar composable--command)
 (defvar composable--skip-first)
 (defvar composable--prefix-arg nil)
@@ -218,6 +221,27 @@ For each function named foo a function name composable-foo is created."
   (interactive)
   (setq composable--prefix-arg 'composable-end))
 
+(defface composable-highlight '((t (:inherit secondary-selection)))
+  "Faced used to highlight the saved region.")
+
+(defvar composable--overlay nil)
+
+(defun composable--delete-highlight ()
+  "Delete overlay."
+  (delete-overlay composable--overlay)
+  (remove-hook 'pre-command-hook 'composable--delete-highlight))
+
+(fset 'composable-save-region
+  (composable-create-composable
+   (lambda (beg end)
+     (interactive "r")
+     (let ((o (make-overlay beg end)))
+       (copy-region-as-kill beg end)
+       (setq composable--overlay o)
+       (overlay-put o 'priority 999)
+       (overlay-put o 'face 'composable-highlight)
+       (add-hook 'pre-command-hook 'composable--delete-highlight)))))
+
 (define-minor-mode composable-object-mode
   "Composable mode."
   :lighter "Object "
@@ -271,7 +295,7 @@ For each function named foo a function name composable-foo is created."
   :global 1
   :keymap
   `((,(kbd "C-w") . composable-kill-region)
-    (,(kbd "M-w") . composable-kill-ring-save)
+    (,(kbd "M-w") . composable-save-region)
     (,(kbd "M-;") . composable-comment-or-uncomment-region)
     (,(kbd "C-x C-u") . composable-upcase-region)
     (,(kbd "C-x C-l") . composable-downcase-region)
