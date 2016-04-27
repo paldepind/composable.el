@@ -79,7 +79,7 @@ This can be either a function or any value accepted by
 (defface easy-kill-selection '((t (:inherit secondary-selection)))
   "Faced used to highlight kill candidate.")
 
-(defvar composable--command)
+(defvar composable--command nil)
 (defvar composable--skip-first)
 (defvar composable--prefix-arg nil)
 (defvar composable--start-point)
