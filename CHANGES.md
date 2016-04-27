@@ -1,6 +1,9 @@
 # Changes
 
 - master
+  - Fix error when object mode entered trough composable-mark-mode for
+    the first time.
+  - Highlight region saved with M-w.
   - A region can be selected by repeating the same composable command
     twice.
   - Support setting custom faces in object mode.
