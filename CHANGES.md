@@ -1,6 +1,7 @@
 # Changes
 
 - master
+  - Fix breakage of mark popping with C-u C-SPC
   - Fix error when object mode entered trough composable-mark-mode for
     the first time.
   - Highlight region saved with M-w.

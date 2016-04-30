@@ -305,9 +305,11 @@ For each function named foo a function name composable-foo is created."
   "Leave object mode when the mark is disabled."
   (when composable-object-mode (composable-object-mode -1)))
 
-(defun composable--set-mark-command-advice (&rest _)
-  "Advice for `set-mark-command'.  _ is ignored."
-  (unless composable-object-mode (composable-object-mode)))
+(defun composable--set-mark-command-advice (arg)
+  "Advice for `set-mark-command'.
+Activates composable-object-mode unless ARG is non-nil."
+  (unless (or composable-object-mode arg)
+    (composable-object-mode)))
 
 ;;;###autoload
 (define-minor-mode composable-mark-mode

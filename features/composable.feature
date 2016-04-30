@@ -374,3 +374,10 @@ Feature: composable
     And I press "C-w - y y y"
     Then I should see "(first  fifth)"
 
+  Scenario: Not breaking C-u C-SPC
+    When I insert "a couple of words"
+    And I place the cursor after "a"
+    And I press "C-SPC C-SPC"
+    And I place the cursor after "words"
+    And I press "C-u C-SPC"
+    Then the cursor should be between "a" and " couple"
