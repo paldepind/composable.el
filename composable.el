@@ -188,7 +188,8 @@ For each function named foo a function name composable-foo is created."
   (cond
    (composable--skip-first
     (setq composable--skip-first nil))
-   ((not (member this-command composable--arguments))
+   ((and (not (member this-command composable--arguments)) ;; detect prefix < 25.1
+         (not (eq last-command this-command))) ;; in 25.1 prefix args don't change `this-command'
     (when composable--prefix-arg (composable--handle-prefix this-command composable--fn-pairs))
     (when composable-repeat (composable--activate-repeat this-command (point-marker)))
     (composable--call-excursion composable--command composable--start-point)

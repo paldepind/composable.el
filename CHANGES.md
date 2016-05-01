@@ -1,6 +1,7 @@
 # Changes
 
 - master
+  - Properly detect prefix arguments in Emacs >= 25.1
   - Fix breakage of mark popping with C-u C-SPC
   - Fix error when object mode entered trough composable-mark-mode for
     the first time.
