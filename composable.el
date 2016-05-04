@@ -263,6 +263,7 @@ For each function named foo a function name composable-foo is created."
     ((kbd "e") . move-end-of-line)
     ((kbd "f") . forward-word)
     ((kbd "b") . backward-word)
+    ((kbd "u") . mark-whole-buffer)
     ((kbd "n") . next-line)
     ((kbd "p") . previous-line)
     ((kbd "l") . composable-mark-line)
