@@ -164,6 +164,7 @@ Besides the bindings mentioned below 0-9 are bound to
 | <kbd>a</kbd> | `move-beginning-of-line` |
 | <kbd>f</kbd> | `forward-word` |
 | <kbd>b</kbd> | `backward-word` |
+| <kbd>u</kbd> | `mark-whole-buffer` |
 | <kbd>n</kbd> | `next-line` |
 | <kbd>p</kbd> | `previous-line` |
 | <kbd>l</kbd> | `composable-mark-line` |
