@@ -153,6 +153,12 @@ Feature: composable
 
     """
 
+  Scenario: Mark word
+    When I insert "first second third"
+    And I place the cursor after "sec"
+    And I press "C-SPC w"
+    Then the region should be "second"
+
   Scenario: Mark three words forward
     When I insert "first second third fourth fifth"
     And I place the cursor before "second"

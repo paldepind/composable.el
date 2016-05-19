@@ -26,18 +26,6 @@
 
 ;;; Code:
 
-(defun composable-mark-line (arg)
-  "Mark ARG lines."
-  (interactive "p")
-  (beginning-of-line)
-  (push-mark
-   (save-excursion
-     (when (region-active-p)
-       (goto-char (mark)))
-     (forward-line arg)
-     (point))
-   nil t))
-
 (defun composable-mark-join (arg)
   "Mark the whitespace seperating lines.
 Between the line above if ARG is negative otherwise below."
@@ -55,13 +43,21 @@ Between the line above if ARG is negative otherwise below."
 
 (defun composable--mark-with-forward (forward arg)
   "Mark a region based on a FORWARD movement and ARG.
-The movement must move backwards with negative arguments."
-  (let* ((amount (if arg (prefix-numeric-value arg)
-                  (if (< (mark) (point)) -1 1)))
-         (dir (/ amount (abs amount))))
-    (when (not (region-active-p))
+The movement must mark backwards with negative arguments."
+  (let* ((amount (if arg
+                     (prefix-numeric-value arg)
+                   (if (< (mark) (point)) -1 1)))
+         (dir (/ amount (abs amount)))
+         (empty-sel (and (region-active-p) (= (mark) (point)))))
+    (when (or (not (region-active-p))
+              empty-sel)
       (funcall forward dir)
-      (funcall forward (- dir)))
+      (funcall forward (- dir))
+      (when empty-sel
+        (goto-char
+         (funcall (if (< 0 amount) 'min 'max)
+                  (mark)
+                  (point)))))
     (push-mark
      (save-excursion
        (when (region-active-p)
@@ -69,6 +65,12 @@ The movement must move backwards with negative arguments."
        (funcall forward amount)
        (point))
      nil t)))
+
+(defun composable-mark-line (arg)
+  "Mark ARG lines.
+Supports negative argument and repeating."
+  (interactive "P")
+  (composable--mark-with-forward 'forward-line arg))
 
 (defun composable-mark-word (arg)
   "Mark ARG words.
