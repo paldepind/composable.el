@@ -176,6 +176,7 @@ Besides the bindings mentioned below 0-9 are bound to
 | <kbd>h</kbd> | `mark-paragraph` |
 | <kbd>m</kbd> | `back-to-indentation` |
 | <kbd>j</kbd> | `composable-mark-join` |
+| <kbd>o</kbd> | `composable-mark-up-list` |
 | <kbd>g</kbd> | Leave composable-object-mode |
 | <kbd>C-g</kbd> | Leave composable-object-mode |
 
