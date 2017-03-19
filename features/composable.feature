@@ -387,3 +387,15 @@ Feature: composable
     And I place the cursor after "words"
     And I press "C-u C-SPC"
     Then the cursor should be between "a" and " couple"
+
+  Scenario: Remove list from inside
+    When I insert "(deep (nested (list arg1 arg2)))"
+    And I place the cursor after "1"
+    And I press "C-SPC o C-w"
+    Then I should see "(deep (nested ))"
+
+  Scenario: Remove list from deep inside
+    When I insert "(deep (nested (list arg1 arg2)))"
+    And I place the cursor after "1"
+    And I press "C-SPC oo C-w"
+    Then I should see "(deep )"

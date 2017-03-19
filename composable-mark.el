@@ -84,6 +84,38 @@ Supports negative arguments and repeating."
   (interactive "P")
   (composable--mark-with-forward 'forward-symbol arg))
 
+(defun composable-mark-up-list (arg)
+  "Mark ARG upper lists.
+Supports negative arguments and repeating."
+  (interactive "P")
+  (composable--mark-up 'forward-list 'up-list arg))
+
+(defun composable--mark-up (forward up arg)
+  "Mark a region based on a FORWARD and UP movement and ARG.
+The movement must mark backwards with negative arguments."
+  (let* ((amount (if arg
+                     (prefix-numeric-value arg)
+                   (if (< (mark) (point)) -1 1)))
+         (dir (/ amount (abs amount)))
+         (empty-sel (and (region-active-p) (= (mark) (point)))))
+    (when (or (not (region-active-p))
+              empty-sel)
+      (funcall up dir)
+      (funcall up (- dir))
+      (when empty-sel
+        (goto-char
+         (funcall (if (< 0 amount) 'min 'max)
+                  (mark)
+                  (point)))))
+    (push-mark
+     (progn
+       (when (region-active-p)
+         (goto-char (mark)))
+       (funcall up (- amount))
+       (point))
+     nil t)
+    (funcall forward amount)))
+
 (provide 'composable-mark)
 
 ;;; composable-mark.el ends here

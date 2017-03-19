@@ -275,6 +275,7 @@ For each function named foo a function name composable-foo is created."
     ((kbd "h") . mark-paragraph)
     ((kbd "m") . back-to-indentation)
     ((kbd "j") . composable-mark-join)
+    ((kbd "o") . composable-mark-up-list)
     ((kbd "g") . composable-object-mode)
     ((kbd "C-g") . composable-object-mode))
   (if composable-object-mode
