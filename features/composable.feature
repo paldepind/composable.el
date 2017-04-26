@@ -399,3 +399,15 @@ Feature: composable
     And I place the cursor after "1"
     And I press "C-SPC oo C-w"
     Then I should see "(deep )"
+
+  Scenario: Kill list from inside
+    When I insert "(deep (nested (list arg1 arg2)))"
+    And I place the cursor after "1"
+    And I press "C-w o"
+    Then I should see "(deep (nested ))"
+
+  Scenario: Kill list from deep inside
+    When I insert "(deep (nested (list arg1 arg2)))"
+    And I place the cursor after "1"
+    And I press "C-w oo"
+    Then I should see "(deep )"
