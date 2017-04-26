@@ -95,18 +95,7 @@ Supports negative arguments and repeating."
 The movement must mark backwards with negative arguments."
   (let* ((amount (if arg
                      (prefix-numeric-value arg)
-                   (if (< (mark) (point)) -1 1)))
-         (dir (/ amount (abs amount)))
-         (empty-sel (and (region-active-p) (= (mark) (point)))))
-    (when (or (not (region-active-p))
-              empty-sel)
-      (funcall up dir)
-      (funcall up (- dir))
-      (when empty-sel
-        (goto-char
-         (funcall (if (< 0 amount) 'min 'max)
-                  (mark)
-                  (point)))))
+                   (if (< (mark) (point)) -1 1))))
     (push-mark
      (progn
        (when (region-active-p)
