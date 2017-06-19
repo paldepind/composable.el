@@ -88,7 +88,7 @@ Supports negative arguments and repeating."
   "Mark ARG upper lists.
 Supports negative arguments and repeating."
   (interactive "P")
-  (composable--mark-up 'forward-list 'up-list arg))
+  (composable--mark-up 'forward-sexp 'up-list arg))
 
 (defun composable--mark-up (forward up arg)
   "Mark a region based on a FORWARD and UP movement and ARG.
@@ -100,7 +100,7 @@ The movement must mark backwards with negative arguments."
      (progn
        (when (region-active-p)
          (goto-char (mark)))
-       (funcall up (- amount))
+       (funcall up (- amount) t t)
        (point))
      nil t)
     (funcall forward amount)))
