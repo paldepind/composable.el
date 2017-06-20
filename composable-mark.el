@@ -84,11 +84,17 @@ Supports negative arguments and repeating."
   (interactive "P")
   (composable--mark-with-forward 'forward-symbol arg))
 
+(defun composable--up-list (arg)
+  "Up-list ARG times with better quotes support."
+  (if (nth 3 (syntax-ppss))
+      (goto-char (nth 8 (syntax-ppss)))
+    (up-list arg)))
+
 (defun composable-mark-up-list (arg)
   "Mark ARG upper lists.
 Supports negative arguments and repeating."
   (interactive "P")
-  (composable--mark-up 'forward-sexp 'up-list arg))
+  (composable--mark-up 'forward-sexp 'composable--up-list arg))
 
 (defun composable--mark-up (forward up arg)
   "Mark a region based on a FORWARD and UP movement and ARG.
@@ -100,7 +106,7 @@ The movement must mark backwards with negative arguments."
      (progn
        (when (region-active-p)
          (goto-char (mark)))
-       (funcall up (- amount) t t)
+       (funcall up (- amount))
        (point))
      nil t)
     (funcall forward amount)))
