@@ -413,13 +413,25 @@ Feature: composable
     Then I should see "(deep )"
 
   Scenario: Kill quoted string from inside
-    When I insert "(deep (nested (somefun "test1 test2")))"
+    When I insert:
+      """
+      (deep (nested (somefun "test1 test2")))
+      """
     And I place the cursor after "1"
     And I press "C-w o"
-    Then I should see "(deep (nested (somefun )))"
+    Then I should see:
+      """
+      (deep (nested (somefun )))
+      """
 
   Scenario: Kill upper list from inside quoted string
-    When I insert "(deep (nested (somefun "test1 test2")))"
+    When I insert:
+      """
+      (deep (nested (somefun "test1 test2")))
+      """
     And I place the cursor after "1"
     And I press "C-w oo"
-    Then I should see "(deep (nested ))"
+    Then I should see:
+      """
+      (deep (nested ))
+      """
