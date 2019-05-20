@@ -46,9 +46,9 @@ Between the line above if ARG is negative otherwise below."
 The movement must mark backwards with negative arguments."
   (let* ((amount (if arg
                      (prefix-numeric-value arg)
-                   (if (< (mark) (point)) -1 1)))
+                   (if (< (mark t) (point)) -1 1)))
          (dir (/ amount (abs amount)))
-         (empty-sel (and (region-active-p) (= (mark) (point)))))
+         (empty-sel (and (region-active-p) (= (mark t) (point)))))
     (when (or (not (region-active-p))
               empty-sel)
       (funcall forward dir)
@@ -56,12 +56,12 @@ The movement must mark backwards with negative arguments."
       (when empty-sel
         (goto-char
          (funcall (if (< 0 amount) 'min 'max)
-                  (mark)
+                  (mark t)
                   (point)))))
     (push-mark
      (save-excursion
        (when (region-active-p)
-         (goto-char (mark)))
+         (goto-char (mark t)))
        (funcall forward amount)
        (point))
      nil t)))
@@ -101,11 +101,11 @@ Supports negative arguments and repeating."
 The movement must mark backwards with negative arguments."
   (let* ((amount (if arg
                      (prefix-numeric-value arg)
-                   (if (< (mark) (point)) -1 1))))
+                   (if (< (mark t) (point)) -1 1))))
     (push-mark
      (progn
        (when (region-active-p)
-         (goto-char (mark)))
+         (goto-char (mark t)))
        (funcall up (- amount))
        (point))
      nil t)

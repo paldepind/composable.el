@@ -143,7 +143,7 @@ For each function named foo a function name composable-foo is created."
     (interactive)
     (goto-char (marker-position point-marker))
     ;; Activate mark, some mark functions expands region when mark is active
-    (set-mark (mark))
+    (set-mark (mark t))
     (let ((current-prefix-arg direction))
       (call-interactively object))
     (set-marker point-marker (point))
@@ -158,7 +158,7 @@ For each function named foo a function name composable-foo is created."
   "Remove marking before or after point based on prefix argument."
   (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max))
         (pos (marker-position composable--start-point)))
-    (set-mark (funcall fn (mark) pos))
+    (set-mark (funcall fn (mark t) pos))
     (goto-char (funcall fn (point) pos))))
 
 (defvar composable--arguments
