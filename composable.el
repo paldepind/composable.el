@@ -282,7 +282,8 @@ For each function named foo a function name composable-foo is created."
       (progn
         (setq composable--saved-cursor cursor-type)
         (composable--set-cursor composable-object-cursor)
-        (if (not mark-active) (push-mark nil t))
+        (when (not mark-active)
+	    (push-mark nil t (not mark-even-if-inactive)))
         (setq composable--start-point (point-marker))
         (setq composable--skip-first t)
         (add-hook 'post-command-hook 'composable--post-command-hook-handler))
