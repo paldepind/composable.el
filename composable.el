@@ -93,7 +93,7 @@ The returned function will ask for an object, mark the region it
 specifies and call COMMAND on the region."
   (lambda (arg)
     (interactive "P")
-    (cond (mark-active
+    (cond ((region-active-p)
            (call-interactively command))
           (composable-object-mode
            (setq this-command composable-twice-mark)
@@ -134,6 +134,7 @@ For each function named foo a function name composable-foo is created."
   "Call COMMAND if set then go to POINT-MARK marker."
   (when (commandp command)
     (let ((current-prefix-arg composable--command-prefix))
+      (activate-mark)
       (call-interactively command))
     (goto-char (marker-position point-mark))))
 
@@ -190,8 +191,10 @@ For each function named foo a function name composable-foo is created."
     (setq composable--skip-first nil))
    ((and (not (member this-command composable--arguments)) ;; detect prefix < 25.1
          (not (eq last-command this-command))) ;; in 25.1 prefix args don't change `this-command'
-    (when composable--prefix-arg (composable--handle-prefix this-command composable--fn-pairs))
-    (when composable-repeat (composable--activate-repeat this-command (point-marker)))
+    (when composable--prefix-arg
+      (composable--handle-prefix this-command composable--fn-pairs))
+    (when composable-repeat
+      (composable--activate-repeat this-command (point-marker)))
     (composable--call-excursion composable--command composable--start-point)
     (composable-object-mode -1))))
 
@@ -282,14 +285,18 @@ For each function named foo a function name composable-foo is created."
       (progn
         (setq composable--saved-cursor cursor-type)
         (composable--set-cursor composable-object-cursor)
-        (if (not mark-active) (push-mark nil t))
+        (when (not mark-active)
+	    (push-mark nil t))
         (setq composable--start-point (point-marker))
         (setq composable--skip-first t)
         (add-hook 'post-command-hook 'composable--post-command-hook-handler))
     (setq cursor-type composable--saved-cursor)
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil)
-    (setq composable--command nil)))
+    (setq composable--command nil)
+    (when (and (string= last-command "set-mark-command")
+	       (string= this-command "composable-object-mode"))
+      (deactivate-mark))))
 
 ;;;###autoload
 (define-minor-mode composable-mode
@@ -306,13 +313,15 @@ For each function named foo a function name composable-foo is created."
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave object mode when the mark is disabled."
-  (when composable-object-mode (composable-object-mode -1)))
+  (when composable-object-mode
+    (composable-object-mode -1)))
 
 (defun composable--set-mark-command-advice (arg)
   "Advice for `set-mark-command'.
 Activates composable-object-mode unless ARG is non-nil."
-  (unless (or composable-object-mode arg)
-    (composable-object-mode)))
+  (unless (or composable-object-mode
+	      arg)
+    (composable-object-mode 1)))
 
 ;;;###autoload
 (define-minor-mode composable-mark-mode
