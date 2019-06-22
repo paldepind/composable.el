@@ -68,6 +68,9 @@
   "Repeat the last excuted action by repressing the last key."
   :type 'boolean)
 
+(defcustom composable-repeat-copy-save-last t
+  "Keep only the last copied text in the `kill-ring'.")
+
 (defcustom composable-object-cursor 'composable-half-cursor
   "Use a custom face for the cursor when in object mode.
 This can be either a function or any value accepted by
@@ -80,7 +83,7 @@ This can be either a function or any value accepted by
   "Faced used to highlight kill candidate.")
 
 (defvar composable--command nil)
-(defvar composable--skip-first)
+(defvar composable--count 0)                 ;; Count the repeated times
 (defvar composable--prefix-arg nil)
 (defvar composable--start-point)
 (defvar composable--fn-pairs (make-hash-table :test 'equal))
@@ -135,8 +138,8 @@ For each function named foo a function name composable-foo is created."
   (when (commandp command)
     (let ((current-prefix-arg composable--command-prefix))
       (activate-mark)
-      (call-interactively command))
-    (goto-char (marker-position point-mark))))
+      (call-interactively command)
+      (goto-char (marker-position point-mark)))))
 
 (defun composable--repeater (point-marker command object direction)
   "Preserve point at POINT-MARKER when doing COMMAND on OBJECT in DIRECTION."
@@ -148,6 +151,7 @@ For each function named foo a function name composable-foo is created."
     (let ((current-prefix-arg direction))
       (call-interactively object))
     (set-marker point-marker (point))
+    (setq composable--count (1+ composable--count))
     (composable--call-excursion command composable--start-point)))
 
 (defun composable--direction (arg)
@@ -187,8 +191,8 @@ For each function named foo a function name composable-foo is created."
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-object-mode is on."
   (cond
-   (composable--skip-first
-    (setq composable--skip-first nil))
+   ((= composable--count 0)
+    (setq composable--count 1))
    ((and (not (member this-command composable--arguments)) ;; detect prefix < 25.1
          (not (eq last-command this-command))) ;; in 25.1 prefix args don't change `this-command'
     (when composable--prefix-arg
@@ -240,6 +244,10 @@ For each function named foo a function name composable-foo is created."
    (lambda (beg end)
      (interactive "r")
      (let ((o (make-overlay beg end)))
+       ;; Pop kill ring before repeating
+       (when (and (> composable--count 1)
+		  composable-repeat-copy-save-last)
+	 (pop kill-ring))
        (copy-region-as-kill beg end)
        (setq composable--overlay o)
        (overlay-put o 'priority 999)
@@ -286,16 +294,16 @@ For each function named foo a function name composable-foo is created."
         (setq composable--saved-cursor cursor-type)
         (composable--set-cursor composable-object-cursor)
         (when (not mark-active)
-	    (push-mark nil t))
-        (setq composable--start-point (point-marker))
-        (setq composable--skip-first t)
-        (add-hook 'post-command-hook 'composable--post-command-hook-handler))
+	  (push-mark nil t))
+        (setq composable--start-point (point-marker)
+              composable--count 0)
+        (add-hook 'post-command-hook 'composable--post-command-hook-handler)
+	(message "Composable mode: %s" this-command))
     (setq cursor-type composable--saved-cursor)
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil)
     (setq composable--command nil)
-    (when (and (string= last-command "set-mark-command")
-	       (string= this-command "composable-object-mode"))
+    (when (string= this-command "composable-object-mode")
       (deactivate-mark))))
 
 ;;;###autoload

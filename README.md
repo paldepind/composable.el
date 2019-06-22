@@ -247,7 +247,7 @@ The idea is that if you can mark a thing then you know both where the
 thing start and ends. Thus you can not only perform an action on the
 entire thing, but also from point to the begining or end of the thing.
 
-Similairly if you have have a pair of commands that move to the
+Similarly if you have have a pair of commands that move to the
 beginning and end of a thing you can use the two in unison to mark the
 entire thing.
 
