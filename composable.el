@@ -93,7 +93,7 @@ The returned function will ask for an object, mark the region it
 specifies and call COMMAND on the region."
   (lambda (arg)
     (interactive "P")
-    (cond (mark-active
+    (cond ((use-region-p)
            (call-interactively command))
           (composable-object-mode
            (setq this-command composable-twice-mark)
@@ -290,7 +290,8 @@ For each function named foo a function name composable-foo is created."
     (setq cursor-type composable--saved-cursor)
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil)
-    (setq composable--command nil)))
+    (setq composable--command nil)
+    (deactivate-mark)))
 
 ;;;###autoload
 (define-minor-mode composable-mode
@@ -307,7 +308,8 @@ For each function named foo a function name composable-foo is created."
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave object mode when the mark is disabled."
-  (when composable-object-mode (composable-object-mode -1)))
+  (when composable-object-mode
+    (composable-object-mode -1)))
 
 (defun composable--set-mark-command-advice (arg)
   "Advice for `set-mark-command'.
