@@ -66,22 +66,28 @@
 
 (defcustom composable-repeat t
   "Repeat the last excuted action by repressing the last key."
-  :type 'boolean)
+  :type 'boolean
+  :group 'composable)
 
 (defcustom composable-repeat-copy-save-last t
-  "Keep only the last copied text in the `kill-ring'.")
+  "Keep only the last copied text in the `kill-ring'."
+  :type 'boolean
+  :group 'composable)
 
 (defcustom composable-object-cursor 'composable-half-cursor
   "Use a custom face for the cursor when in object mode.
 This can be either a function or any value accepted by
-`cursor-type'.")
+`cursor-type'."
+  :group 'composable)
 
 (defcustom composable-twice-mark 'composable-mark-line
-  "Thing to mark when a composable command is called twice successively.")
+  "Thing to mark when a composable command is called twice successively."
+  :group 'composable)
 
 (defcustom composable-mode-line-color "cyan"
   "Color for mode-line background when composable is active."
-  :type 'color)
+  :type 'color
+  :group 'composable)
 
 (defface easy-kill-selection '((t (:inherit secondary-selection)))
   "Faced used to highlight kill candidate.")
@@ -162,7 +168,9 @@ For each function named foo a function name composable-foo is created."
 (defun composable--direction (arg)
   "Direction of ARG."
   (let ((n (prefix-numeric-value arg)))
-    (if n (/ n (abs n)) 1)))
+    (if n
+	(/ n (abs n))
+      1)))
 
 (defun composable--contain-marking ()
   "Remove marking before or after point based on prefix argument."
