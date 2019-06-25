@@ -288,3 +288,13 @@ When a prefix argument is specified before a paired movement command
 (begin and end are treated the same) the two commands are used to
 establish a region. For instance both <kbd>M-w , f</kbd> and <kbd>M-w . f</kbd> will save the
 current word to the kill ring.
+
+## Mode-line Color indicator
+
+A variable `composable-mode-line-color` is defined to change the
+mode-line background color when the composable mode is active. The
+default value for this variable is "cyan" but it can be set to any
+valid color.
+
+If you don't want a color change in the mode-line, then just set this
+variable to `nil`.

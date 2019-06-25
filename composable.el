@@ -79,9 +79,14 @@ This can be either a function or any value accepted by
 (defcustom composable-twice-mark 'composable-mark-line
   "Thing to mark when a composable command is called twice successively.")
 
+(defcustom composable-mode-line-color "cyan"
+  "Color for mode-line background when composable is active."
+  :type 'color)
+
 (defface easy-kill-selection '((t (:inherit secondary-selection)))
   "Faced used to highlight kill candidate.")
 
+(defvar composable--saved-mode-line-color nil)
 (defvar composable--command nil)
 (defvar composable--count 0)                 ;; Count the repeated times
 (defvar composable--prefix-arg nil)
@@ -170,6 +175,12 @@ For each function named foo a function name composable-foo is created."
   '(universal-argument digit-argument negative-argument
    composable-begin-argument composable-end-argument))
 
+(defun composable--exit ()
+  "Actions to perform every time composable exits."
+  (set-marker composable--start-point nil)
+  (when composable--saved-mode-line-color
+    (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color)))
+
 (defun composable--activate-repeat (object point-marker)
   "Activate repeat map on OBJECT preserving point at POINT-MARKER."
   (interactive)
@@ -180,7 +191,8 @@ For each function named foo a function name composable-foo is created."
    t
    (lambda ()
      (set-marker point-marker nil)
-     (set-marker composable--start-point nil))))
+     (composable--exit)))
+  )
 
 (defun composable--handle-prefix (command pairs)
   "Handle prefix arg where the COMMAND is paired in PAIRS."
@@ -258,40 +270,45 @@ For each function named foo a function name composable-foo is created."
   "Composable mode."
   :lighter "Object "
   :keymap
-  `((,(kbd "1") . digit-argument)
-    (,(kbd "2") . digit-argument)
-    (,(kbd "3") . digit-argument)
-    (,(kbd "4") . digit-argument)
-    (,(kbd "5") . digit-argument)
-    (,(kbd "6") . digit-argument)
-    (,(kbd "7") . digit-argument)
-    (,(kbd "8") . digit-argument)
-    (,(kbd "9") . digit-argument)
-    (,(kbd "-") . negative-argument)
-    (,(kbd ".") . composable-end-argument)
-    (,(kbd ",") . composable-begin-argument)
-    (,(kbd "a") . move-beginning-of-line)
-    (,(kbd "e") . move-end-of-line)
-    (,(kbd "f") . forward-word)
-    (,(kbd "b") . backward-word)
-    (,(kbd "u") . mark-whole-buffer)
-    (,(kbd "n") . next-line)
-    (,(kbd "p") . previous-line)
-    (,(kbd "l") . composable-mark-line)
-    (,(kbd "{") . backward-paragraph)
-    (,(kbd "}") . forward-paragraph)
-    (,(kbd "s") . mark-sexp)
-    (,(kbd "w") . composable-mark-word)
-    (,(kbd "y") . composable-mark-symbol)
-    (,(kbd "h") . mark-paragraph)
-    (,(kbd "m") . back-to-indentation)
-    (,(kbd "j") . composable-mark-join)
-    (,(kbd "o") . composable-mark-up-list)
-    (,(kbd "g") . composable-object-mode)
+  `(("1" . digit-argument)
+    ("2" . digit-argument)
+    ("3" . digit-argument)
+    ("4" . digit-argument)
+    ("5" . digit-argument)
+    ("6" . digit-argument)
+    ("7" . digit-argument)
+    ("8" . digit-argument)
+    ("9" . digit-argument)
+    ("-" . negative-argument)
+    ("." . composable-end-argument)
+    ("," . composable-begin-argument)
+    ("a" . move-beginning-of-line)
+    ("e" . move-end-of-line)
+    ("f" . forward-word)
+    ("b" . backward-word)
+    ("u" . mark-whole-buffer)
+    ("n" . next-line)
+    ("p" . previous-line)
+    ("l" . composable-mark-line)
+    ("{" . backward-paragraph)
+    ("}" . forward-paragraph)
+    ("s" . mark-sexp)
+    ("w" . composable-mark-word)
+    ("y" . composable-mark-symbol)
+    ("h" . mark-paragraph)
+    ("m" . back-to-indentation)
+    ("j" . composable-mark-join)
+    ("o" . composable-mark-up-list)
+    ("g" . composable-object-mode)
     (,(kbd "C-g") . composable-object-mode))
   (if composable-object-mode
       (progn
         (setq composable--saved-cursor cursor-type)
+	(if (and composable-mode-line-color
+		 (color-supported-p composable-mode-line-color))
+	    (progn (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
+		   (set-face-attribute 'mode-line nil :background composable-mode-line-color))
+	  (setq composable--saved-mode-line-color nil))
         (composable--set-cursor composable-object-cursor)
         (when (not mark-active)
 	  (push-mark nil t))
@@ -303,7 +320,9 @@ For each function named foo a function name composable-foo is created."
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil)
     (setq composable--command nil)
-    (when (string= this-command "composable-object-mode")
+    (when (or (called-interactively-p)
+	      (not composable-repeat))
+      (composable--exit)
       (deactivate-mark))))
 
 ;;;###autoload
