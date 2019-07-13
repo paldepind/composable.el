@@ -100,6 +100,7 @@ This can be either a function or any value accepted by
 (defvar composable--fn-pairs (make-hash-table :test 'equal))
 (defvar composable--command-prefix nil)
 (defvar composable--saved-cursor nil)
+(defvar composable--expand nil)
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -113,8 +114,8 @@ specifies and call COMMAND on the region."
            (setq this-command composable-twice-mark)
            (funcall composable-twice-mark arg))
           (t
-           (setq composable--command-prefix arg)
-           (setq composable--command command)
+           (setq composable--command-prefix arg
+		 composable--command command)
            (composable-object-mode)))))
 
 (defun composable-def (commands)
@@ -133,10 +134,6 @@ For each function named foo a function name composable-foo is created."
   "Change cursor to a half-height box."
   (let ((height (/ (window-pixel-height) (* (window-height) 2))))
     (setq cursor-type (cons 'hbar height))))
-
-(defun composable--set-cursor (c)
-  "Set cursor to C"
-  (when c (setq cursor-type (if (functionp c) (funcall c) c))))
 
 (defun composable--singleton-map (key def)
   "Create a map with a single KEY with definition DEF."
@@ -157,8 +154,10 @@ For each function named foo a function name composable-foo is created."
   (lambda ()
     (interactive)
     (goto-char (marker-position point-marker))
-    ;; Activate mark, some mark functions expands region when mark is active
-    (set-mark (mark t))
+    (if composable--expand
+	(push-mark (mark t) t t)
+      (push-mark (point) t t))     ;; Activate mark, some mark functions expands region when mark is active
+
     (let ((current-prefix-arg direction))
       (call-interactively object))
     (set-marker point-marker (point))
@@ -183,11 +182,28 @@ For each function named foo a function name composable-foo is created."
   '(universal-argument digit-argument negative-argument
    composable-begin-argument composable-end-argument))
 
+
+(defun composable--start ()
+  "Action to perform when starting composable."
+  (if (and composable-mode-line-color  ;; Mode-line
+	   (color-supported-p composable-mode-line-color))
+      (progn (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
+	     (set-face-attribute 'mode-line nil :background composable-mode-line-color))
+    (setq composable--saved-mode-line-color nil))
+
+  (when composable-object-cursor       ;; "Set cursor to C"
+    (setq cursor-type (if (functionp composable-object-cursor)
+			  (funcall composable-object-cursor)
+			composable-object-cursor)))
+  (when (not mark-active)              ;; Push the mark 
+    (push-mark nil t)))
+
 (defun composable--exit ()
   "Actions to perform every time composable exits."
   (set-marker composable--start-point nil)
   (when composable--saved-mode-line-color
-    (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color)))
+    (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color))
+  (setq composable--expand nil))  ;; By default the commands don't expand
 
 (defun composable--activate-repeat (object point-marker)
   "Activate repeat map on OBJECT preserving point at POINT-MARKER."
@@ -261,14 +277,14 @@ For each function named foo a function name composable-foo is created."
 
 (fset 'composable-save-region
   (composable-create-composable
-   (lambda (beg end)
-     (interactive "r")
-     (let ((o (make-overlay beg end)))
-       ;; Pop kill ring before repeating
+   (lambda (mark point)
+     (interactive (list (mark) (point)))
+     (let ((o (make-overlay composable--start-point point)))
+
        (when (and (> composable--count 1)
 		  composable-repeat-copy-save-last)
-	 (pop kill-ring))
-       (copy-region-as-kill beg end)
+	 (setq last-command 'kill-region))
+       (copy-region-as-kill mark point)
        (setq composable--overlay o)
        (overlay-put o 'priority 999)
        (overlay-put o 'face 'composable-highlight)
@@ -288,8 +304,8 @@ For each function named foo a function name composable-foo is created."
     ("8" . digit-argument)
     ("9" . digit-argument)
     ("-" . negative-argument)
-    ("." . composable-end-argument)
     ("," . composable-begin-argument)
+    ("." . composable-end-argument)
     ("a" . move-beginning-of-line)
     ("e" . move-end-of-line)
     ("f" . forward-word)
@@ -312,23 +328,19 @@ For each function named foo a function name composable-foo is created."
   (if composable-object-mode
       (progn
         (setq composable--saved-cursor cursor-type)
-	(if (and composable-mode-line-color
-		 (color-supported-p composable-mode-line-color))
-	    (progn (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
-		   (set-face-attribute 'mode-line nil :background composable-mode-line-color))
-	  (setq composable--saved-mode-line-color nil))
-        (composable--set-cursor composable-object-cursor)
-        (when (not mark-active)
-	  (push-mark nil t))
+
+        (composable--start)
+
         (setq composable--start-point (point-marker)
               composable--count 0)
         (add-hook 'post-command-hook 'composable--post-command-hook-handler)
 	(message "Composable mode: %s" this-command))
+
     (setq cursor-type composable--saved-cursor)
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
-    (setq composable--prefix-arg nil)
-    (setq composable--command nil)
-    (when (or (called-interactively-p)
+    (setq composable--prefix-arg nil
+	  composable--command nil)
+    (when (or (called-interactively-p 'any)
 	      (not composable-repeat))
       (composable--exit)
       (deactivate-mark))))
@@ -356,6 +368,7 @@ For each function named foo a function name composable-foo is created."
 Activates composable-object-mode unless ARG is non-nil."
   (unless (or composable-object-mode
 	      arg)
+    (setq composable--expand t)
     (composable-object-mode 1)))
 
 ;;;###autoload
