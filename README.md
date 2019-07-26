@@ -298,3 +298,15 @@ valid color.
 
 If you don't want a color change in the mode-line, then just set this
 variable to `nil`.
+
+## Which-key integration
+
+Composable integrates out of the box with the package [which-key](https://github.com/justbur/emacs-which-key) if it is installed. When which-key-mode is enabled composable commands show a menu listing the possible commands.
+
+To disable this feature just add:
+
+```lisp
+(setq composable-which-keys nil)
+```
+
+to your config.

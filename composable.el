@@ -64,6 +64,11 @@
   :prefix "composable-"
   :group 'tools)
 
+(defcustom composable-which-keys t
+  "Show bindings available when entering composable if which-key is installed."
+  :type 'boolean
+  :group 'composable)
+
 (defcustom composable-repeat t
   "Repeat the last excuted action by repressing the last key."
   :type 'boolean
@@ -96,7 +101,7 @@ This can be either a function or any value accepted by
 (defvar composable--command nil)
 (defvar composable--count 0)                 ;; Count the repeated times
 (defvar composable--prefix-arg nil)
-(defvar composable--start-point)
+(defvar composable--start-point nil)
 (defvar composable--fn-pairs (make-hash-table :test 'equal))
 (defvar composable--command-prefix nil)
 (defvar composable--saved-cursor nil)
@@ -333,6 +338,13 @@ For each function named foo a function name composable-foo is created."
 
         (setq composable--start-point (point-marker)
               composable--count 0)
+
+	;; which-key
+	(when (and composable-which-keys
+		   (bound-and-true-p which-key-mode))
+	  (setq which-key-persistent-popup t)
+	  (which-key-show-keymap 'composable-object-mode-map t))
+
         (add-hook 'post-command-hook 'composable--post-command-hook-handler)
 	(message "Composable mode: %s" this-command))
 
@@ -340,6 +352,11 @@ For each function named foo a function name composable-foo is created."
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil
 	  composable--command nil)
+
+    (when (bound-and-true-p which-key-persistent-popup)
+      (setq which-key-persistent-popup nil)
+      (which-key--hide-popup))
+
     (when (or (called-interactively-p 'any)
 	      (not composable-repeat))
       (composable--exit)
