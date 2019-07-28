@@ -101,7 +101,7 @@ This can be either a function or any value accepted by
 (defvar composable--command nil)
 (defvar composable--count 0)                 ;; Count the repeated times
 (defvar composable--prefix-arg nil)
-(defvar composable--start-point nil)
+(defvar composable--start-point (make-marker))
 (defvar composable--fn-pairs (make-hash-table :test 'equal))
 (defvar composable--command-prefix nil)
 (defvar composable--saved-cursor nil)
@@ -284,8 +284,10 @@ For each function named foo a function name composable-foo is created."
   (composable-create-composable
    (lambda (mark point)
      (interactive (list (mark) (point)))
-     (let ((o (make-overlay composable--start-point point)))
-
+     (let ((o (make-overlay (if (marker-position composable--start-point)
+				 composable--start-point
+			       mark)
+			     point)))
        (when (and (> composable--count 1)
 		  composable-repeat-copy-save-last)
 	 (setq last-command 'kill-region))
