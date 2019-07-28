@@ -114,6 +114,7 @@ specifies and call COMMAND on the region."
   (lambda (arg)
     (interactive "P")
     (cond ((region-active-p)
+	   (setq composable--count 0)
            (call-interactively command))
           (composable-object-mode
            (setq this-command composable-twice-mark)
