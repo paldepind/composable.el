@@ -27,7 +27,7 @@
 ;;; Code:
 
 (defun composable-mark-join (arg)
-  "Mark the whitespace seperating lines.
+  "Mark the whitespace separating lines.
 Between the line above if ARG is negative otherwise below."
   (interactive "p")
   (forward-line arg)
