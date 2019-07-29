@@ -83,10 +83,12 @@
   "Use a custom face for the cursor when in object mode.
 This can be either a function or any value accepted by
 `cursor-type'."
+  :type 'function
   :group 'composable)
 
 (defcustom composable-twice-mark 'composable-mark-line
   "Thing to mark when a composable command is called twice successively."
+  :type 'function
   :group 'composable)
 
 (defcustom composable-mode-line-color "cyan"
@@ -108,7 +110,7 @@ This can be either a function or any value accepted by
 (defvar composable--command-prefix nil)
 (defvar composable--saved-cursor nil)
 (defvar composable--expand nil)
-(defvar composable--which-key-timer nil) 
+(defvar composable--which-key-timer nil)
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -388,8 +390,7 @@ For each function named foo a function name composable-foo is created."
 	(setq composable--overlay (make-overlay 0 0))
 	(overlay-put composable--overlay 'priority 999)
 	(overlay-put composable--overlay 'face 'composable-highlight))
-    (setq composable--overlay nil)
-  ))
+    (setq composable--overlay nil)))
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave object mode when the mark is disabled."
