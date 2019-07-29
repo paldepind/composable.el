@@ -106,6 +106,7 @@ This can be either a function or any value accepted by
 (defvar composable--command-prefix nil)
 (defvar composable--saved-cursor nil)
 (defvar composable--expand nil)
+(defvar composable--which-key-timer nil) 
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -345,8 +346,9 @@ For each function named foo a function name composable-foo is created."
 	;; which-key
 	(when (and composable-which-keys
 		   (bound-and-true-p which-key-mode))
-	  (setq which-key-persistent-popup t)
-	  (which-key-show-keymap 'composable-object-mode-map t))
+	  (setq composable--which-key-timer
+		(run-with-idle-timer which-key-idle-delay nil
+				     #'which-key-show-keymap 'composable-object-mode-map t)))
 
         (add-hook 'post-command-hook 'composable--post-command-hook-handler)
 	(message "Composable mode: %s" this-command))
@@ -356,9 +358,8 @@ For each function named foo a function name composable-foo is created."
     (setq composable--prefix-arg nil
 	  composable--command nil)
 
-    (when (bound-and-true-p which-key-persistent-popup)
-      (setq which-key-persistent-popup nil)
-      (which-key--hide-popup))
+    (when (bound-and-true-p which-key-mode)
+      (cancel-timer composable--which-key-timer))
 
     (when (or (called-interactively-p 'any)
 	      (not composable-repeat))
