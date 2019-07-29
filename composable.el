@@ -94,6 +94,11 @@ This can be either a function or any value accepted by
   :type 'color
   :group 'composable)
 
+(defcustom composable-kill-region-highlight nil
+  "Use composable highlight when kilkling preselected region."
+  :type 'boolean
+  :group 'composable)
+
 (defface easy-kill-selection '((t (:inherit secondary-selection)))
   "Faced used to highlight kill candidate.")
 
@@ -283,21 +288,24 @@ For each function named foo a function name composable-foo is created."
   (remove-hook 'pre-command-hook 'composable--delete-highlight))
 
 (fset 'composable-save-region
-  (composable-create-composable
-   (lambda (mark point)
-     (interactive (list (mark) (point)))
-     (let ((o (make-overlay (if (marker-position composable--start-point)
-				 composable--start-point
-			       mark)
-			     point)))
-       (when (and (> composable--count 1)
-		  composable-repeat-copy-save-last)
-	 (setq last-command 'kill-region))
-       (copy-region-as-kill mark point)
-       (setq composable--overlay o)
-       (overlay-put o 'priority 999)
-       (overlay-put o 'face 'composable-highlight)
-       (add-hook 'pre-command-hook 'composable--delete-highlight)))))
+      (composable-create-composable
+       (lambda (mark point)
+	 (interactive (list (mark) (point)))
+	 (when (and (> composable--count 1)
+		    composable-repeat-copy-save-last)
+	   (setq last-command 'kill-region))
+	 (copy-region-as-kill mark point)
+
+	 (when (or (> composable--count 1)
+		   composable-kill-region-highlight ;; set this to true if you want highlight after coping a region
+		   composable-object-mode)
+	   (if (marker-position composable--start-point)
+	       (move-overlay composable--overlay
+			     (min point composable--start-point mark)
+			     (max point composable--start-point mark))
+	     (move-overlay composable--overlay (min point mark) (max point mark)))
+	   (add-hook 'pre-command-hook 'composable--delete-highlight)))))
+
 
 (define-minor-mode composable-object-mode
   "Composable mode."
@@ -377,7 +385,15 @@ For each function named foo a function name composable-foo is created."
     (,(kbd "M-;") . composable-comment-or-uncomment-region)
     (,(kbd "C-x C-u") . composable-upcase-region)
     (,(kbd "C-x C-l") . composable-downcase-region)
-    (,(kbd "C-M-\\") . composable-indent-region)))
+    (,(kbd "C-M-\\") . composable-indent-region))
+  (if composable-mode
+      (progn
+	(setq composable--overlay (make-overlay 0 0))
+	(overlay-put composable--overlay 'priority 999)
+	(overlay-put composable--overlay 'face 'composable-highlight)
+	)
+    (setq composable--overlay nil)
+  ))
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave object mode when the mark is disabled."
