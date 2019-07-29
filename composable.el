@@ -94,7 +94,7 @@ This can be either a function or any value accepted by
   :type 'color
   :group 'composable)
 
-(defcustom composable-kill-region-highlight nil
+(defcustom composable-copy-active-region-highlight nil
   "Use composable highlight when kilkling preselected region."
   :type 'boolean
   :group 'composable)
@@ -297,7 +297,7 @@ For each function named foo a function name composable-foo is created."
 	 (copy-region-as-kill mark point)
 
 	 (when (or (> composable--count 1)
-		   composable-kill-region-highlight ;; set this to true if you want highlight after coping a region
+		   composable-copy-active-region-highlight ;; set to true if you want highlight active region
 		   composable-object-mode)
 	   (if (marker-position composable--start-point)
 	       (move-overlay composable--overlay
@@ -390,8 +390,7 @@ For each function named foo a function name composable-foo is created."
       (progn
 	(setq composable--overlay (make-overlay 0 0))
 	(overlay-put composable--overlay 'priority 999)
-	(overlay-put composable--overlay 'face 'composable-highlight)
-	)
+	(overlay-put composable--overlay 'face 'composable-highlight))
     (setq composable--overlay nil)
   ))
 

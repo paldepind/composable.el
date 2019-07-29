@@ -267,7 +267,7 @@ line—including the line break. This is because <kbd>l</kbd> marks the
 entire line but due to <kbd>.</kbd> only the end of the marked region
 is used.
 
-Similairly <kbd>C-w h</kbd> will kill one paragraph from beginning to
+Similarly <kbd>C-w h</kbd> will kill one paragraph from beginning to
 end. But <kbd>C-w , h</kbd> will kill one paragraph backwards and
 <kbd>C-w . h</kbd> will kill one paragraph forward.
 
@@ -310,3 +310,20 @@ To disable this feature just add:
 ```
 
 to your config.
+
+## Kill specific options
+
+Composable implements a special version for `copy-region-as-kill`
+called `composable-save-region`. 
+
+By default composable always highlights the copied region
+independently if the region was active before calling the kill command
+or not. This is different to `copy-region-as-kill` which disables the
+region after the copy. But in composable it makes some sense. Any way,
+if the user wants the default behavior he can set:
+
+``` common-lisp
+(setq composable-copy-active-region-highlight nil)
+```
+
+
