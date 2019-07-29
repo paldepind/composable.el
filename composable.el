@@ -94,13 +94,10 @@ This can be either a function or any value accepted by
   :type 'color
   :group 'composable)
 
-(defcustom composable-copy-active-region-highlight nil
+(defcustom composable-copy-active-region-highlight t
   "Use composable highlight when kilkling preselected region."
   :type 'boolean
   :group 'composable)
-
-(defface easy-kill-selection '((t (:inherit secondary-selection)))
-  "Faced used to highlight kill candidate.")
 
 (defvar composable--saved-mode-line-color nil)
 (defvar composable--command nil)
@@ -287,7 +284,7 @@ For each function named foo a function name composable-foo is created."
   (delete-overlay composable--overlay)
   (remove-hook 'pre-command-hook 'composable--delete-highlight))
 
-(fset 'composable-save-region
+(fset 'composable-copy-region-as-kill
       (composable-create-composable
        (lambda (mark point)
 	 (interactive (list (mark) (point)))
@@ -381,7 +378,7 @@ For each function named foo a function name composable-foo is created."
   :global 1
   :keymap
   `((,(kbd "C-w") . composable-kill-region)
-    (,(kbd "M-w") . composable-save-region)
+    (,(kbd "M-w") . composable-copy-region-as-kill)
     (,(kbd "M-;") . composable-comment-or-uncomment-region)
     (,(kbd "C-x C-u") . composable-upcase-region)
     (,(kbd "C-x C-l") . composable-downcase-region)
