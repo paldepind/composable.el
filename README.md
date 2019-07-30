@@ -289,6 +289,14 @@ When a prefix argument is specified before a paired movement command
 establish a region. For instance both <kbd>M-w , f</kbd> and <kbd>M-w . f</kbd> will save the
 current word to the kill ring.
 
+The default defined pairs are:
+
+1. forward-word &&  backward-word: To select the current work
+2. move-end-of-line && back-to-indentation: To select the line (without indentation)
+3. next-line && previous-line
+4. forward-paragraph && backward-paragraph
+5. forward-sentence && backward-sentence
+
 ## Mode-line Color indicator
 
 A variable `composable-mode-line-color` is defined to change the

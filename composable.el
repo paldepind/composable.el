@@ -152,13 +152,13 @@ For each function named foo a function name composable-foo is created."
     (define-key map key def)
     map))
 
-(defun composable--call-excursion (command point-mark)
+(defun composable--call-excursion (command)
   "Call COMMAND if set then go to POINT-MARK marker."
   (when (commandp command)
     (let ((current-prefix-arg composable--command-prefix))
       (activate-mark)
       (call-interactively command)
-      (goto-char (marker-position point-mark)))))
+      (goto-char (marker-position composable--start-point)))))
 
 (defun composable--repeater (point-marker command object direction)
   "Preserve point at POINT-MARKER when doing COMMAND on OBJECT in DIRECTION."
@@ -173,7 +173,7 @@ For each function named foo a function name composable-foo is created."
       (call-interactively object))
     (set-marker point-marker (point))
     (setq composable--count (1+ composable--count))
-    (composable--call-excursion command composable--start-point)))
+    (composable--call-excursion command)))
 
 (defun composable--direction (arg)
   "Direction of ARG."
@@ -181,13 +181,6 @@ For each function named foo a function name composable-foo is created."
     (if n
 	(/ n (abs n))
       1)))
-
-(defun composable--contain-marking ()
-  "Remove marking before or after point based on prefix argument."
-  (let ((fn (if (eq composable--prefix-arg 'composable-begin) 'min 'max))
-        (pos (marker-position composable--start-point)))
-    (set-mark (funcall fn (mark t) pos))
-    (goto-char (funcall fn (point) pos))))
 
 (defvar composable--arguments
   '(universal-argument digit-argument negative-argument
@@ -229,11 +222,19 @@ For each function named foo a function name composable-foo is created."
      (composable--exit)))
   )
 
-(defun composable--handle-prefix (command pairs)
+(defun composable--handle-prefix (command)
   "Handle prefix arg where the COMMAND is paired in PAIRS."
-  (let ((pair (gethash command pairs)))
-    (cond (pair (set-mark (point)) (call-interactively pair))
-          (mark-active (composable--contain-marking)))))
+  (let ((pair (gethash command composable--fn-pairs)))
+    (cond (pair
+	   (push-mark)
+	   (call-interactively pair))
+          (mark-active
+	   (if (eq composable--prefix-arg 'composable-begin)
+	       (progn
+		 (set-mark (min (mark t) composable--start-point))
+		 (goto-char (min (point) composable--start-point)))
+	     (set-mark (max (mark t) composable--start-point))
+	     (goto-char (max (point) composable--start-point)))))))
 
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-object-mode is on."
@@ -243,10 +244,10 @@ For each function named foo a function name composable-foo is created."
    ((and (not (member this-command composable--arguments)) ;; detect prefix < 25.1
          (not (eq last-command this-command))) ;; in 25.1 prefix args don't change `this-command'
     (when composable--prefix-arg
-      (composable--handle-prefix this-command composable--fn-pairs))
+      (composable--handle-prefix this-command))
     (when composable-repeat
       (composable--activate-repeat this-command (point-marker)))
-    (composable--call-excursion composable--command composable--start-point)
+    (composable--call-excursion composable--command)
     (composable-object-mode -1))))
 
 (defun composable-add-pair (fn1 fn2)
