@@ -70,19 +70,19 @@ The movement must mark backwards with negative arguments."
   "Mark ARG lines.
 Supports negative argument and repeating."
   (interactive "P")
-  (composable--mark-with-forward 'forward-line arg))
+  (composable--mark-with-forward #'forward-line arg))
 
 (defun composable-mark-word (arg)
   "Mark ARG words.
 Supports negative arguments and repeating."
   (interactive "P")
-  (composable--mark-with-forward 'forward-word arg))
+  (composable--mark-with-forward #'forward-word arg))
 
 (defun composable-mark-symbol (arg)
   "Mark ARG symbols.
 Supports negative arguments and repeating."
   (interactive "P")
-  (composable--mark-with-forward 'forward-symbol arg))
+  (composable--mark-with-forward #'forward-symbol arg))
 
 (defun composable--up-list (arg)
   "Up-list ARG times with better quotes support."
@@ -94,7 +94,7 @@ Supports negative arguments and repeating."
   "Mark ARG upper lists.
 Supports negative arguments and repeating."
   (interactive "P")
-  (composable--mark-up 'forward-sexp 'composable--up-list arg))
+  (composable--mark-up #'forward-sexp #'composable--up-list arg))
 
 (defun composable--mark-up (forward up arg)
   "Mark a region based on a FORWARD and UP movement and ARG.
