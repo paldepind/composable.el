@@ -111,6 +111,7 @@ This can be either a function or any value accepted by
 (defvar composable--saved-cursor nil)
 (defvar composable--expand nil)
 (defvar composable--which-key-timer nil)
+(defvar composable--last-input nil)
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -145,12 +146,6 @@ For each function named foo a function name composable-foo is created."
   "Change cursor to a half-height box."
   (let ((height (/ (window-pixel-height) (* (window-height) 2))))
     (setq cursor-type (cons 'hbar height))))
-
-(defun composable--singleton-map (key def)
-  "Create a map with a single KEY with definition DEF."
-  (let ((map (make-sparse-keymap)))
-    (define-key map key def)
-    map))
 
 (defun composable--call-excursion (command)
   "Call COMMAND if set then go to POINT-MARK marker."
@@ -208,6 +203,12 @@ For each function named foo a function name composable-foo is created."
   (when composable--saved-mode-line-color
     (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color))
   (setq composable--expand nil))  ;; By default the commands don't expand
+
+(defun composable--singleton-map (key def)
+  "Create a map with a single KEY with definition DEF."
+  (let ((map (make-sparse-keymap)))
+    (define-key map key def)
+    map))
 
 (defun composable--activate-repeat (object point-marker)
   "Activate repeat map on OBJECT preserving point at POINT-MARKER."
@@ -306,6 +307,16 @@ For each function named foo a function name composable-foo is created."
 	     (move-overlay composable--overlay (min point mark) (max point mark)))
 	   (add-hook 'pre-command-hook 'composable--delete-highlight)))))
 
+(defun composable-goto-char (arg char)
+  (interactive (list (prefix-numeric-value current-prefix-arg)
+		     (or composable--last-input
+			 (read-char "char: " t))))
+  (if (and (not composable--last-input)
+	   (char-table-p translation-table-for-input))
+      (setq composable--last-input (or (aref translation-table-for-input char) char))
+    (setq composable--last-input char))
+  (search-forward (char-to-string composable--last-input) nil nil arg))
+
 
 (define-minor-mode composable-object-mode
   "Composable mode."
@@ -324,6 +335,7 @@ For each function named foo a function name composable-foo is created."
     ("," . composable-begin-argument)
     ("." . composable-end-argument)
     ("a" . move-beginning-of-line)
+    ("c" . composable-goto-char)
     ("e" . move-end-of-line)
     ("f" . forward-word)
     ("b" . backward-word)
@@ -349,7 +361,8 @@ For each function named foo a function name composable-foo is created."
         (composable--start)
 
         (setq composable--start-point (point-marker)
-              composable--count 0)
+              composable--count 0
+	      composable--last-input nil)
 
 	;; which-key
 	(when (and composable-which-keys
