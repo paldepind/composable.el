@@ -435,3 +435,39 @@ Feature: composable
       """
       (deep (nested ))
       """
+
+  Scenario: Commenting lines with repeat
+    When I insert:
+    """
+    1. line
+    2. line
+    3. line
+    4. line
+    """
+    And I place the cursor after "2."
+    And I press "M-; l l"
+    Then I should see:
+    """
+    1. line
+    ;; 2. line
+    ;; 3. line
+    4. line
+    """
+
+  Scenario: Kill with goto-char
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "C-w c t"
+    Then I should see "first hird forth fifth"
+
+  Scenario: Kill with goto-char repeating
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "C-w c t c c"
+    Then I should see "first h"
+
+  Scenario: Kill with goto-char backward
+    When I insert "first second third forth fifth"
+    And I place the cursor after "forth"
+    And I press "C-w - c r"
+    Then I should see "first second third fo fifth"
