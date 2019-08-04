@@ -284,16 +284,17 @@ For each function named foo a function name composable-foo is created."
   (composable-create-composable
    (lambda (mark point)
      (interactive (list (mark) (point)))
-     (let ((o (make-overlay composable--start-point point)))
-
-       (when (and (> composable--count 1)
-		  composable-repeat-copy-save-last)
-	 (setq last-command 'kill-region))
-       (copy-region-as-kill mark point)
-       (setq composable--overlay o)
-       (overlay-put o 'priority 999)
-       (overlay-put o 'face 'composable-highlight)
-       (add-hook 'pre-command-hook 'composable--delete-highlight)))))
+     (if (null (marker-position composable--start-point))
+         (call-interactively #'kill-ring-save)
+       (let ((o (make-overlay composable--start-point point)))
+         (when (and (> composable--count 1)
+                    composable-repeat-copy-save-last)
+           (setq last-command 'kill-region))
+         (copy-region-as-kill mark point)
+         (setq composable--overlay o)
+         (overlay-put o 'priority 999)
+         (overlay-put o 'face 'composable-highlight)
+         (add-hook 'pre-command-hook 'composable--delete-highlight))))))
 
 (define-minor-mode composable-object-mode
   "Composable mode."
