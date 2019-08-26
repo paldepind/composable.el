@@ -178,11 +178,9 @@ For each function named foo a function name composable-foo is created."
 
 (defun composable--start ()
   "Action to perform when starting composable."
-  (if (and composable-mode-line-color  ;; Mode-line
-	   (color-supported-p composable-mode-line-color))
-      (progn (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
-	     (set-face-attribute 'mode-line nil :background composable-mode-line-color))
-    (setq composable--saved-mode-line-color nil))
+  (when (and composable-mode-line-color  ;; Mode-line
+	     (color-supported-p composable-mode-line-color))
+    (set-face-attribute 'mode-line nil :background composable-mode-line-color))
 
   (if composable-object-cursor       ;; "Change cursor cursor to C"
     (setq composable--saved-cursor cursor-type
@@ -207,8 +205,12 @@ For each function named foo a function name composable-foo is created."
   (when composable--saved-cursor
    (setq cursor-type composable--saved-cursor))
 
-  (when composable--saved-mode-line-color
+  (when (and composable--saved-mode-line-color
+	     (not (eq composable--saved-mode-line-color
+		      (face-attribute 'mode-line :background))))
     (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color))
+
+  (delete-overlay composable--overlay)
 
   (setq composable--expand nil))  ;; By default the commands don't expand
 
@@ -288,29 +290,22 @@ For each function named foo a function name composable-foo is created."
 
 (defvar composable--overlay nil)
 
-(defun composable--delete-highlight ()
-  "Delete overlay."
-  (delete-overlay composable--overlay)
-  (remove-hook 'pre-command-hook 'composable--delete-highlight))
-
 (fset 'composable-copy-region-as-kill
       (composable-create-composable
        (lambda (mark point)
 	 (interactive (list (mark) (point)))
-	 (when (and (> composable--count 1)
-		    composable-repeat-copy-save-last)
-	   (setq last-command 'kill-region))
-	 (copy-region-as-kill mark point)
 
-	 (when (or (> composable--count 1)
-		   composable-copy-active-region-highlight ;; set to true if you want highlight active region
-		   composable-object-mode)
+	 (when (> composable--count 0)
 	   (if (marker-position composable--start-point)
 	       (move-overlay composable--overlay
 			     (min point composable--border-point mark)
 			     (max point composable--border-point mark))
 	     (move-overlay composable--overlay (min point mark) (max point mark)))
-	   (add-hook 'pre-command-hook 'composable--delete-highlight)))))
+
+	   (when (and (> composable--count 1)
+		      composable-repeat-copy-save-last)
+	     (setq last-command 'kill-region))
+	   (copy-region-as-kill mark point)))))
 
 (defun composable-goto-char (arg char)
   (interactive (list (prefix-numeric-value current-prefix-arg)
@@ -400,9 +395,13 @@ For each function named foo a function name composable-foo is created."
     (,(kbd "C-M-\\") . composable-indent-region))
   (if composable-mode
       (progn
-	(setq composable--overlay (make-overlay 0 0))
+	(setq composable--overlay (make-overlay 0 0)
+	      composable--saved-mode-line-color (and composable-mode-line-color
+						     (face-attribute 'mode-line :background)))
+
 	(overlay-put composable--overlay 'priority 999)
-	(overlay-put composable--overlay 'face 'composable-highlight))
+	(overlay-put composable--overlay 'face 'composable-highlight)
+	(delete-overlay composable--overlay))
     (setq composable--overlay nil)))
 
 (defun composable--deactivate-mark-hook-handler ()
