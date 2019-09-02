@@ -120,7 +120,8 @@ The returned function will ask for an object, mark the region it
 specifies and call COMMAND on the region."
   (lambda (arg)
     (interactive "P")
-    (cond ((region-active-p)
+    (cond ((or (region-active-p)
+	       (bound-and-true-p multiple-cursors-mode))
 	   (setq composable--count 0)
            (call-interactively command))
           (composable-object-mode
@@ -304,8 +305,9 @@ For each function named foo a function name composable-foo is created."
 
 	   (when (and (> composable--count 1)
 		      composable-repeat-copy-save-last)
-	     (setq last-command 'kill-region))
-	   (copy-region-as-kill mark point)))))
+	     (setq last-command 'kill-region)))
+
+	 (copy-region-as-kill mark point))))
 
 (defun composable-goto-char (arg char)
   (interactive (list (prefix-numeric-value current-prefix-arg)
@@ -413,7 +415,8 @@ For each function named foo a function name composable-foo is created."
   "Advice for `set-mark-command'.
 Activates composable-object-mode unless ARG is non-nil."
   (unless (or composable-object-mode
-	      arg)
+	      arg
+	      (bound-and-true-p multiple-cursors-mode))
     (setq composable--expand t)
     (composable-object-mode 1)))
 
