@@ -1,6 +1,6 @@
 ;;; composable.el --- composable editing -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016 Simon Friis Vindum
+;; Copyright (C) 2016-2020 Simon Friis Vindum
 
 ;; Author: Simon Friis Vindum <simon@vindum.io>
 ;; Keywords: lisp
@@ -211,7 +211,8 @@ For each function named foo a function name composable-foo is created."
 		      (face-attribute 'mode-line :background))))
     (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color))
 
-  (delete-overlay composable--overlay)
+  (when (overlayp composable--overlay)
+    (delete-overlay composable--overlay))
 
   (setq composable--expand nil))  ;; By default the commands don't expand
 
@@ -286,7 +287,8 @@ For each function named foo a function name composable-foo is created."
   (interactive)
   (setq composable--prefix-arg 'composable-end))
 
-(defface composable-highlight '((t (:inherit secondary-selection)))
+(defface composable-highlight
+  '((t (:inherit secondary-selection :extend nil)))
   "Faced used to highlight the saved region.")
 
 (defvar composable--overlay nil)
