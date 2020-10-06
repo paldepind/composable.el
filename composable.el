@@ -181,6 +181,7 @@ For each function named foo a function name composable-foo is created."
   "Action to perform when starting composable."
   (when (and composable-mode-line-color  ;; Mode-line
 	     (color-supported-p composable-mode-line-color))
+    (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
     (set-face-attribute 'mode-line nil :background composable-mode-line-color))
 
   (if composable-object-cursor       ;; "Change cursor cursor to C"
