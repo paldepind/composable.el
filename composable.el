@@ -390,23 +390,29 @@ For each function named foo a function name composable-foo is created."
       (composable--exit)
       (deactivate-mark))))
 
+(defvar composable-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [remap kill-region] #'composable-kill-region)
+    (define-key map [remap kill-ring-save] #'composable-copy-region-as-kill)
+    (define-key map [remap comment-dwim] #'composable-comment-or-uncomment-region)
+    (define-key map [remap upcase-region] #'composable-upcase-region)
+    (define-key map [remap downcase-region] #'composable-downcase-region)
+    (define-key map [remap indent-region] #'composable-indent-region)
+    map)
+  "Keymap for composable-mode commands after entering.")
+
 ;;;###autoload
 (define-minor-mode composable-mode
   "Toggle Composable mode."
   :lighter " Composable"
   :global 1
-  :keymap
-  `((,(kbd "C-w") . composable-kill-region)
-    (,(kbd "M-w") . composable-copy-region-as-kill)
-    (,(kbd "M-;") . composable-comment-or-uncomment-region)
-    (,(kbd "C-x C-u") . composable-upcase-region)
-    (,(kbd "C-x C-l") . composable-downcase-region)
-    (,(kbd "C-M-\\") . composable-indent-region))
+  :keymap composable-mode-map
   (if composable-mode
       (progn
 	(setq composable--overlay (make-overlay 0 0)
-	      composable--saved-mode-line-color (and composable-mode-line-color
-						     (face-attribute 'mode-line :background)))
+	      composable--saved-mode-line-color
+	      (and composable-mode-line-color
+		   (face-attribute 'mode-line :background)))
 
 	(overlay-put composable--overlay 'priority 999)
 	(overlay-put composable--overlay 'face 'composable-highlight)
