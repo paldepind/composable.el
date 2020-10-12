@@ -471,3 +471,9 @@ Feature: composable
     And I place the cursor after "forth"
     And I press "C-w - c r"
     Then I should see "first second third fo fifth"
+
+  Scenario: Kill with goto-char with prefix
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "C-w 3 c t"
+    Then I should see "first h"
