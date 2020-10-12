@@ -51,20 +51,16 @@ Between the line above if ARG is negative otherwise below."
 (defmacro composable--mark-with-forward (forward arg)
   "Mark a region based on a FORWARD movement and ARG.
 The movement must mark backwards with negative arguments."
-  `(let* ((amount (cond (,arg (prefix-numeric-value ,arg))
-			((< (mark t) (point)) -1)
-			(t 1)))
+  `(let* ((amount (prefix-numeric-value ,arg))
           (dir (/ amount (abs amount))))
      (when (= composable--count 1)
        (funcall ,forward dir)
        (funcall ,forward (- dir))
        (setq composable--border-point (point-marker))
        (set-mark (point))
-
        (if (< 0 amount)
 	   (goto-char (min (mark t) (point)))
 	 (goto-char (max (mark t) (point)))))
-
      (funcall ,forward amount)))
 
 (defun composable-mark-line (arg)
