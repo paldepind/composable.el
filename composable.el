@@ -406,8 +406,7 @@ For each function named foo a function name composable-foo is created."
 		   (face-attribute 'mode-line :background)))
 
 	(overlay-put composable--overlay 'priority 999)
-	(overlay-put composable--overlay 'face 'composable-highlight)
-	(delete-overlay composable--overlay))
+	(overlay-put composable--overlay 'face 'composable-highlight))
     (setq composable--overlay nil)))
 
 (defun composable--deactivate-mark-hook-handler ()
