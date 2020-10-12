@@ -76,7 +76,8 @@
   "Keep only the last copied text in the `kill-ring'."
   :type 'boolean)
 
-(defcustom composable-object-cursor 'composable-half-cursor
+(defcustom composable-object-cursor (and (display-graphic-p)
+					 'composable-half-cursor)
   "Use a custom face for the cursor when in object mode.
 This can be either a function or any value accepted by
 `cursor-type'."
@@ -181,12 +182,11 @@ For each function named foo a function name composable-foo is created."
 	     (color-supported-p composable-mode-line-color))
     (set-face-attribute 'mode-line nil :background composable-mode-line-color))
 
-  (if composable-object-cursor       ;; "Change cursor cursor to C"
+  (when composable-object-cursor       ;; "Change cursor cursor to C"
     (setq composable--saved-cursor cursor-type
-	  cursor-type (if (functionp composable-object-cursor)
-			  (funcall composable-object-cursor)
-			composable-object-cursor))
-    (setq composable--saved-cursor nil))
+	  cursor-type (or (and (functionp composable-object-cursor)
+			       (funcall composable-object-cursor))
+			  composable-object-cursor)))
 
   (setq composable--start-point (point-marker)
 	composable--border-point composable--start-point
@@ -194,9 +194,19 @@ For each function named foo a function name composable-foo is created."
 	composable--last-input nil)
 
   (push-mark nil t)
-  )
 
-(defun composable--exit ()
+  ;; which-key
+  (when (and composable-which-keys
+	     (bound-and-true-p which-key-mode))
+    (setq composable--which-key-timer
+	  (run-with-idle-timer which-key-idle-delay nil
+			       #'which-key-show-keymap 'composable-object-mode-map t)))
+
+  (add-hook 'post-command-hook 'composable--post-command-hook-handler)
+  (message "Composable mode: %s" this-command))
+
+
+(defun composable--object-exit ()
   "Actions to perform every time composable exits."
   (set-marker composable--start-point nil)
   (set-marker composable--border-point nil)
@@ -228,7 +238,7 @@ For each function named foo a function name composable-foo is created."
     (vector last-command-event)
     (composable--repeater composable--command object (composable--direction last-prefix-arg)))
    t
-   'composable--exit))
+   'composable--object-exit))
 
 (defun composable--handle-prefix (command)
   "Handle prefix arg where the COMMAND is paired in PAIRS."
@@ -356,18 +366,7 @@ For each function named foo a function name composable-foo is created."
   :lighter "Composable object "
   :keymap composable-object-mode-map
   (if composable-object-mode
-      (progn
-        (composable--start)
-
-	;; which-key
-	(when (and composable-which-keys
-		   (bound-and-true-p which-key-mode))
-	  (setq composable--which-key-timer
-		(run-with-idle-timer which-key-idle-delay nil
-				     #'which-key-show-keymap 'composable-object-mode-map t)))
-
-        (add-hook 'post-command-hook 'composable--post-command-hook-handler)
-	(message "Composable mode: %s" this-command))
+      (composable--start)
 
     (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil
@@ -379,7 +378,7 @@ For each function named foo a function name composable-foo is created."
     (when (or (called-interactively-p 'any)
 	      (not composable-repeat)
 	      (eq this-command 'set-mark-command))
-      (composable--exit)
+      (composable--object-exit)
       (deactivate-mark))))
 
 (defvar composable-mode-map
