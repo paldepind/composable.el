@@ -303,7 +303,7 @@ For each function named foo a function name composable-foo is created."
 	       (move-overlay composable--overlay
 			     (min point composable--border-point mark)
 			     (max point composable--border-point mark))
-	     (move-overlay composable--overlay (min point mark) (max point mark)))
+	     (move-overlay composable--overlay (region-beginning) (region-end)))
 
 	   (when (and (> composable--count 1)
 		      composable-repeat-copy-save-last)
@@ -361,7 +361,7 @@ For each function named foo a function name composable-foo is created."
 
 (define-minor-mode composable-object-mode
   "Composable mode."
-  :lighter "Object "
+  :lighter "Composable object "
   :keymap composable-object-mode-map
   (if composable-object-mode
       (progn
@@ -404,7 +404,7 @@ For each function named foo a function name composable-foo is created."
 ;;;###autoload
 (define-minor-mode composable-mode
   "Toggle Composable mode."
-  :lighter " Composable"
+  :lighter " Composable mode"
   :global 1
   :keymap composable-mode-map
   (if composable-mode
