@@ -66,41 +66,39 @@
 
 (defcustom composable-which-keys t
   "Show bindings available when entering composable if which-key is installed."
-  :type 'boolean
-  :group 'composable)
+  :type 'boolean)
 
 (defcustom composable-repeat t
   "Repeat the last excuted action by repressing the last key."
-  :type 'boolean
-  :group 'composable)
+  :type 'boolean)
 
 (defcustom composable-repeat-copy-save-last t
   "Keep only the last copied text in the `kill-ring'."
-  :type 'boolean
-  :group 'composable)
+  :type 'boolean)
 
 (defcustom composable-object-cursor 'composable-half-cursor
   "Use a custom face for the cursor when in object mode.
 This can be either a function or any value accepted by
 `cursor-type'."
-  :type 'function
-  :group 'composable)
+  :type 'function)
 
 (defcustom composable-twice-mark 'composable-mark-line
   "Thing to mark when a composable command is called twice successively."
-  :type 'function
-  :group 'composable)
+  :type 'function)
 
 (defcustom composable-mode-line-color "cyan"
   "Color for mode-line background when composable is active."
-  :type 'color
-  :group 'composable)
+  :type 'color)
 
 (defcustom composable-copy-active-region-highlight t
   "Use composable highlight when kilkling preselected region."
-  :type 'boolean
-  :group 'composable)
+  :type 'boolean)
 
+(defface composable-highlight
+  '((t (:inherit secondary-selection :extend nil)))
+  "Faced used to highlight the saved region.")
+
+(defvar composable--overlay nil)
 (defvar composable--saved-mode-line-color nil)
 (defvar composable--command nil)
 (defvar composable--count 0)                 ;; Count the repeated times
@@ -211,7 +209,7 @@ For each function named foo a function name composable-foo is created."
 		      (face-attribute 'mode-line :background))))
     (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color))
 
-  (when (overlayp composable--overlay)
+  (when composable--overlay
     (delete-overlay composable--overlay))
 
   (setq composable--expand nil))  ;; By default the commands don't expand
@@ -286,12 +284,6 @@ For each function named foo a function name composable-foo is created."
   "Set prefix argument to end."
   (interactive)
   (setq composable--prefix-arg 'composable-end))
-
-(defface composable-highlight
-  '((t (:inherit secondary-selection :extend nil)))
-  "Faced used to highlight the saved region.")
-
-(defvar composable--overlay nil)
 
 (fset 'composable-copy-region-as-kill
       (composable-create-composable
