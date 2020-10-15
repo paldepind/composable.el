@@ -173,8 +173,11 @@ For each function named foo a function name composable-foo is created."
   )
 
 (defvar composable--arguments
-  '(universal-argument digit-argument negative-argument
-   composable-begin-argument composable-end-argument))
+  '(universal-argument
+    digit-argument
+    negative-argument
+    composable-begin-argument
+    composable-end-argument))
 
 (defun composable--start ()
   "Action to perform when starting composable."
@@ -203,7 +206,7 @@ For each function named foo a function name composable-foo is created."
 	  (run-with-idle-timer which-key-idle-delay nil
 			       #'which-key-show-keymap 'composable-object-mode-map t)))
 
-  (add-hook 'post-command-hook 'composable--post-command-hook-handler)
+  (add-hook 'post-command-hook #'composable--post-command-hook-handler)
   (message "Composable mode: %s" this-command))
 
 
@@ -367,7 +370,7 @@ For each function named foo a function name composable-foo is created."
   (if composable-object-mode
       (composable--start)
 
-    (remove-hook 'post-command-hook 'composable--post-command-hook-handler)
+    (remove-hook 'post-command-hook #'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil
 	  composable--command nil)
 
