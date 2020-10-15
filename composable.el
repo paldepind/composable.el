@@ -168,9 +168,7 @@ For each function named foo a function name composable-foo is created."
     (setq composable--count (1+ composable--count))
     (let ((current-prefix-arg direction))
       (call-interactively object))
-    (composable--call-excursion command)
-    )
-  )
+    (composable--call-excursion command)))
 
 (defvar composable--arguments
   '(universal-argument
@@ -230,6 +228,8 @@ For each function named foo a function name composable-foo is created."
   "Create a map with a single KEY with definition DEF."
   (let ((map (make-sparse-keymap)))
     (define-key map key def)
+    (if (characterp composable--last-input)
+	(define-key map (string composable--last-input) def))
     map))
 
 (defun composable--activate-repeat (object)
@@ -238,7 +238,8 @@ For each function named foo a function name composable-foo is created."
   (set-transient-map
    (composable--singleton-map
     (vector last-command-event)
-    (composable--repeater composable--command object (composable--direction last-prefix-arg)))
+    (composable--repeater composable--command object
+			  (composable--direction last-prefix-arg)))
    t
    'composable--object-exit))
 
