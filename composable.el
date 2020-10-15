@@ -358,8 +358,9 @@ For each function named foo a function name composable-foo is created."
     (define-key map (kbd "h") #'composable-mark-paragraph)
     (define-key map (kbd "j") #'composable-mark-join)
     (define-key map (kbd "o") #'composable-mark-up-list)
-    (define-key map (kbd "g") #'composable-object-mode)
-    (define-key map (kbd "C-g")  #'composable-object-mode)
+    (define-key map (kbd "g") #'composable-object-mode-disable)
+    (define-key map [remap keyboard-escape-quit] #'composable-object-mode-disable)
+    (define-key map [remap keyboard-quit] #'composable-object-mode-disable)
     map)
   "Keymap for composable-object-mode commands after entering.")
 
@@ -383,6 +384,10 @@ For each function named foo a function name composable-foo is created."
 	      (eq this-command 'set-mark-command))
       (composable--object-exit)
       (deactivate-mark))))
+
+(defun composable-object-mode-disable ()
+  (interactive)
+  (composable-object-mode -1))
 
 (defvar composable-mode-map
   (let ((map (make-sparse-keymap)))
