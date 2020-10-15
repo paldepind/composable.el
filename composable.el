@@ -425,10 +425,10 @@ Activates composable-object-mode unless ARG is non-nil."
   :global 1
   (if composable-mark-mode
       (progn
-        (add-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
-        (advice-add 'set-mark-command :before 'composable--set-mark-command-advice))
-    (remove-hook 'deactivate-mark-hook 'composable--deactivate-mark-hook-handler)
-    (advice-remove 'set-mark-command 'composable--set-mark-command-advice)))
+        (add-hook 'deactivate-mark-hook #'composable--deactivate-mark-hook-handler)
+        (advice-add 'set-mark-command :before #'composable--set-mark-command-advice))
+    (remove-hook 'deactivate-mark-hook #'composable--deactivate-mark-hook-handler)
+    (advice-remove 'set-mark-command #'composable--set-mark-command-advice)))
 
 (provide 'composable)
 
