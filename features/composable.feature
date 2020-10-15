@@ -487,5 +487,5 @@ Feature: composable
   Scenario: Kill with composable-end-argument
     When I insert "first second third forth fifth"
     And I place the cursor before "third"
-    And I press "C-w , l"
+    And I press "C-w . l"
     Then I should see "first second "
