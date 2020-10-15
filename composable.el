@@ -180,6 +180,7 @@ For each function named foo a function name composable-foo is created."
   "Action to perform when starting composable."
   (when (and composable-mode-line-color  ;; Mode-line
 	     (color-supported-p composable-mode-line-color))
+    (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
     (set-face-attribute 'mode-line nil :background composable-mode-line-color))
 
   (when composable-object-cursor       ;; "Change cursor cursor to C"
@@ -214,9 +215,7 @@ For each function named foo a function name composable-foo is created."
   (when composable--saved-cursor
    (setq cursor-type composable--saved-cursor))
 
-  (when (and composable--saved-mode-line-color
-	     (not (eq composable--saved-mode-line-color
-		      (face-attribute 'mode-line :background))))
+  (when composable--saved-mode-line-color
     (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color))
 
   (when composable--overlay
@@ -400,10 +399,7 @@ For each function named foo a function name composable-foo is created."
   :keymap composable-mode-map
   (if composable-mode
       (progn
-	(setq composable--overlay (make-overlay 0 0)
-	      composable--saved-mode-line-color
-	      (and composable-mode-line-color
-		   (face-attribute 'mode-line :background)))
+	(setq composable--overlay (make-overlay 0 0))
 
 	(overlay-put composable--overlay 'priority 999)
 	(overlay-put composable--overlay 'face 'composable-highlight))
