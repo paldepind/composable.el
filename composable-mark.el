@@ -31,10 +31,7 @@
 
 (defun composable--direction (arg)
   "Direction of ARG."
-  (let ((n (prefix-numeric-value arg)))
-    (if n
-	(/ n (abs n))
-      1)))
+  (let ((n (prefix-numeric-value arg))) (/ n (abs n))))
 
 (defun composable-mark-join (arg)
   "Mark the whitespace separating lines.
@@ -51,28 +48,20 @@ Between the line above if ARG is negative otherwise below."
     (push-mark nil nil t)
     (move (- arg))))
 
-(defun composable--mark-with-forward (forward arg)
+(defmacro composable--mark-with-forward (forward arg)
   "Mark a region based on a FORWARD movement and ARG.
 The movement must mark backwards with negative arguments."
-  (let* ((amount (if arg
-                     (prefix-numeric-value arg)
-                   (if (< (mark t) (point)) -1 1)))
-         (dir (/ amount (abs amount))))
-    (when (= composable--count 1)
-	(progn
-	  (funcall forward dir)
-	  (funcall forward (- dir))
-	  (setq composable--border-point (point-marker))
-	  (set-mark (point))
-
-	  (if (< 0 amount)
-	      (goto-char (min (mark t) (point)))
-	    (goto-char (max (mark t) (point))))
-	  )
-	)
-
-    (funcall forward amount)
-  ))
+  `(let* ((amount (prefix-numeric-value ,arg))
+          (dir (/ amount (abs amount))))
+     (when (= composable--count 1)
+       (funcall ,forward dir)
+       (funcall ,forward (- dir))
+       (setq composable--border-point (point-marker))
+       (set-mark (point))
+       (if (< 0 amount)
+	   (goto-char (min (mark t) (point)))
+	 (goto-char (max (mark t) (point)))))
+     (funcall ,forward amount)))
 
 (defun composable-mark-line (arg)
   "Mark ARG lines.

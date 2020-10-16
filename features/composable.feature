@@ -182,6 +182,14 @@ Feature: composable
     And I press "a"
     Then I should see "first asecond third"
 
+  Scenario: Cancel with g
+    When I insert "first second third"
+    And I place the cursor before "second"
+    And I press "C-w"
+    And I press "g"
+    And I press "a"
+    Then I should see "first asecond third"
+
   Scenario: Use beginning of region with prefix
     When I insert "first second third"
     And I place the cursor before "second"
@@ -466,8 +474,47 @@ Feature: composable
     And I press "C-w c t c c"
     Then I should see "first h"
 
+  Scenario: Kill with goto-char repeating
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "C-w c t t t"
+    Then I should see "first h"
+
+  Scenario: Copy with goto-char repeating and C-e
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "M-w c t t"
+    And I press "C-e"
+    And I press "C-y"
+    Then I should see "first second third forth fifthsecond third fort"
+
+  Scenario: Copy with goto-char repeating inplace
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "M-w c t t"
+    And I press "C-y"
+    Then I should see "first second third fortsecond third forth fifth"
+
   Scenario: Kill with goto-char backward
     When I insert "first second third forth fifth"
     And I place the cursor after "forth"
     And I press "C-w - c r"
     Then I should see "first second third fo fifth"
+
+  Scenario: Kill with goto-char with prefix
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "C-w 3 c t"
+    Then I should see "first h"
+
+  Scenario: Kill with composable-begin-argument
+    When I insert "first second third forth fifth"
+    And I place the cursor before "third"
+    And I press "C-w , l"
+    Then I should see "third forth fifth"
+
+  Scenario: Kill with composable-end-argument
+    When I insert "first second third forth fifth"
+    And I place the cursor before "third"
+    And I press "C-w . l"
+    Then I should see "first second "
