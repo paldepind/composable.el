@@ -518,3 +518,17 @@ Feature: composable
     And I place the cursor before "third"
     And I press "C-w . l"
     Then I should see "first second "
+
+  Scenario: Composable-mark mode word
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "C-SPC w w"
+    And I press "C-w"
+    Then I should see "first  forth fifth"
+
+  Scenario: Composable-mark mode end line
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "C-SPC e"
+    And I press "C-w"
+    Then I should see "first "

@@ -411,7 +411,11 @@ For each function named foo a function name composable-foo is created."
 	(setq composable--overlay (make-overlay 0 0))
 
 	(overlay-put composable--overlay 'priority 999)
-	(overlay-put composable--overlay 'face 'composable-highlight))
+	(overlay-put composable--overlay 'face 'composable-highlight)
+	;; associate the overlay with no specific buffer. Otherwise it
+	;; may be not visible when set for the first time and appear
+	;; visible when not expected.
+	(delete-overlay composable--overlay))
     (setq composable--overlay nil)))
 
 (defun composable--deactivate-mark-hook-handler ()

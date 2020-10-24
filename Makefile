@@ -12,4 +12,4 @@ test:
 
 plain:
 	$(EMACS) --version
-	$(EMACS) $(LOAD) -f composable-mode
+	$(EMACS) $(LOAD) -f composable-mode -f composable-mark-mode
