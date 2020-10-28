@@ -397,14 +397,14 @@ For each function named foo a function name composable-foo is created."
       (cancel-timer composable--which-key-timer))
 
     (when (or (called-interactively-p 'any)
-	      (not composable-repeat)
-	      (eq this-command 'set-mark-command))
+	      (not composable-repeat))
       (composable--object-exit)
       (deactivate-mark))))
 
 (defun composable-object-mode-disable ()
   (interactive)
-  (call-interactively #'composable-object-mode -1))
+  (when composable-object-mode ;; This check is extremely important
+    (funcall-interactively #'composable-object-mode -1)))
 
 (defvar composable-mode-map
   (let ((map (make-sparse-keymap)))
@@ -437,8 +437,7 @@ For each function named foo a function name composable-foo is created."
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave object mode when the mark is disabled."
-  (when composable-object-mode
-    (composable-object-mode -1)))
+  (composable-object-mode-disable))
 
 (defun composable--set-mark-command-advice (arg)
   "Advice for `set-mark-command'.
