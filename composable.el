@@ -387,7 +387,7 @@ For each function named foo a function name composable-foo is created."
 
 (defun composable-object-mode-disable ()
   (interactive)
-  (composable-object-mode -1))
+  (call-interactively #'composable-object-mode -1))
 
 (defvar composable-mode-map
   (let ((map (make-sparse-keymap)))
