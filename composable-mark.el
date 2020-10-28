@@ -39,10 +39,9 @@ Between the line above if ARG is negative otherwise below."
   (interactive "p")
   (forward-line arg)
   (cl-flet ((move (dir)
-                  (funcall (if (< 0 dir)
-                               'skip-chars-forward
-                             'skip-chars-backward)
-                           "[:space:]\n")))
+		  (if (< 0 dir)
+                      (skip-chars-forward "[:space:]\n")
+                    (skip-chars-backward "[:space:]\n"))))
     (when (< arg 0) (end-of-line))
     (move arg)
     (push-mark nil nil t)
@@ -89,9 +88,10 @@ Supports negative arguments and repeating."
 
 (defun composable--up-list (arg)
   "Up-list ARG times with better quotes support."
-  (if (nth 3 (syntax-ppss))
-      (goto-char (nth 8 (syntax-ppss)))
-    (up-list arg)))
+  (let ((syntax-ppss (syntax-ppss)))
+    (if (nth 3 syntax-ppss)
+	(goto-char (nth 8 syntax-ppss))
+      (up-list arg))))
 
 (defun composable-mark-up-list (arg)
   "Mark ARG upper lists.
