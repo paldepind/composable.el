@@ -5,7 +5,7 @@
 ;; Author: Simon Friis Vindum <simon@vindum.io>
 ;; Keywords: lisp
 ;; Version: 0.0.1
-;; Package-Requires: ((emacs "24.4"))
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -383,7 +383,7 @@ For each function named foo a function name composable-foo is created."
 (define-minor-mode composable-object-mode
   "Composable mode."
   :lighter (and (> composable-mode-debug-level 1)
-		"Composable object")
+		" Composable object")
   :keymap composable-object-mode-map
   (if composable-object-mode
       (composable-object--start)

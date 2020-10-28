@@ -1,4 +1,5 @@
-dist: trusty
+os: linux
+dist: xenial
 
 language: generic
 
@@ -8,10 +9,10 @@ before_install:
   - cask
 
 env:
-  matrix:
-    - EVM_EMACS=emacs-24.5-travis
-    - EVM_EMACS=emacs-26.3-travis
-    - EVM_EMACS=emacs-git-snapshot-travis
+  jobs:
+    - EVM_EMACS=emacs-25.1-travis
+    - EVM_EMACS=emacs-26.3-travis-linux-xenial
+    - EVM_EMACS=emacs-git-snapshot-travis-linux-xenial
 
 script:
   - emacs --version
