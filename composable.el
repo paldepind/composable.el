@@ -95,6 +95,10 @@ This can be either a function or any value accepted by
   "Use composable highlight when kilkling preselected region."
   :type 'boolean)
 
+(defcustom composable-mode-debug-level 1
+  "Print verbose information when composable modes toggle."
+  :type 'integer)
+
 (defface composable-highlight
   '((t (:inherit secondary-selection :extend nil)))
   "Faced used to highlight the saved region.")
@@ -112,6 +116,15 @@ This can be either a function or any value accepted by
 (defvar composable--expand nil)
 (defvar composable--which-key-timer nil)
 (defvar composable--last-input nil)
+
+(defsubst composable-mode-debug-message (format-string &rest args)
+  "Print messages only when `composable-mode-debug' is `non-nil'.
+
+The arguments FORMAT-STRING and ARGS are the same than in the
+`message' function."
+  (if (> composable-mode-debug-level 0)
+      (let ((inhibit-message (< composable-mode-debug-level 2)))
+	(apply #'message format-string args))))
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -177,7 +190,7 @@ For each function named foo a function name composable-foo is created."
     composable-begin-argument
     composable-end-argument))
 
-(defun composable--start ()
+(defun composable-object--start ()
   "Action to perform when starting composable."
   (when (and composable-mode-line-color  ;; Mode-line
 	     (color-supported-p composable-mode-line-color))
@@ -205,11 +218,13 @@ For each function named foo a function name composable-foo is created."
 			       #'which-key-show-keymap 'composable-object-mode-map t)))
 
   (add-hook 'post-command-hook #'composable--post-command-hook-handler)
-  (message "Composable mode: %s" this-command))
+  (composable-mode-debug-message "Start composable-object-mode (command: %s)" this-command))
 
 
 (defun composable--object-exit ()
   "Actions to perform every time composable exits."
+
+  (composable-mode-debug-message "Exit composable-object-mode")
   (set-marker composable--start-point nil)
   (set-marker composable--border-point nil)
 
@@ -367,11 +382,13 @@ For each function named foo a function name composable-foo is created."
 
 (define-minor-mode composable-object-mode
   "Composable mode."
-  :lighter "Composable object "
+  :lighter (and (> composable-mode-debug-level 1)
+		"Composable object")
   :keymap composable-object-mode-map
   (if composable-object-mode
-      (composable--start)
+      (composable-object--start)
 
+    ;; else
     (remove-hook 'post-command-hook #'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil
 	  composable--command nil)

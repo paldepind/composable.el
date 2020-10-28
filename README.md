@@ -319,6 +319,17 @@ To disable this feature just add:
 
 to your config.
 
+## Debug messages
+
+Composable has a way to control the messages printed in the minibuffer
+and/or the \*Messages\* using the variable
+`composable-mode-debug-level' which has the following valid values:
+
+* **0**: No debug info is printed at all.
+* **1**: The debug info is printed only in the \*Messages\* buffer but not in the minibuffer.
+* **2**: The debug info is printed in \*Messages\* and in the minibuffer.
+
+
 ## Kill specific options
 
 Composable implements a special version for `copy-region-as-kill`
