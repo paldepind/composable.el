@@ -21,7 +21,11 @@ jobs:
 
       - name: Build
         shell: bash
-        run: cask && make test
+        run: cask
+
+      - name: Test
+        shell: bash
+        run: make test
 
 # A pretty complete example
 # https://github.com/szermatt/emacs-bash-completion/blob/fa5557709ee11b41a2b5393efe60cd464c56f76e/.github/workflows/test.yml
