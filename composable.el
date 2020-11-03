@@ -153,8 +153,14 @@ For each function named foo a function name composable-foo is created."
           (composable-create-composable c))))
 
 (composable-def
- '(kill-region kill-ring-save indent-region comment-or-uncomment-region
-   smart-comment-region upcase-region downcase-region))
+ '(kill-region
+   kill-ring-save
+   indent-region
+   comment-or-uncomment-region
+   smart-comment-region
+   upcase-region
+   downcase-region
+   delete-region))
 
 (defun composable-half-cursor ()
   "Change cursor to a half-height box."
@@ -414,6 +420,7 @@ For each function named foo a function name composable-foo is created."
     (define-key map [remap upcase-region] #'composable-upcase-region)
     (define-key map [remap downcase-region] #'composable-downcase-region)
     (define-key map [remap indent-region] #'composable-indent-region)
+    (define-key map [remap kill-line] #'composable-delete-region)
     map)
   "Keymap for composable-mode commands after entering.")
 

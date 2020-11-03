@@ -7,17 +7,31 @@ Feature: composable
     Given the buffer is empty
     And there is no region selected
 
-  Scenario: Delete to end of line
+  Scenario: Kill to end of line
     When I insert "foo bar"
     And I place the cursor after "foo"
     And I press "C-w e"
     Then I should not see "bar"
     Then I should see pattern "^foo$"
 
-  Scenario: Delete to beginning of line
+  Scenario: Delete to end of line
+    When I insert "foo bar"
+    And I place the cursor after "foo"
+    And I press "C-k e"
+    Then I should not see "bar"
+    Then I should see pattern "^foo$"
+
+  Scenario: Kill to beginning of line
     When I insert "foo bar"
     And I place the cursor after "foo "
     And I press "C-w a"
+    Then I should not see "foo"
+    Then I should see pattern "^bar$"
+
+  Scenario: Delete to beginning of line
+    When I insert "foo bar"
+    And I place the cursor after "foo "
+    And I press "C-k a"
     Then I should not see "foo"
     Then I should see pattern "^bar$"
 
@@ -27,16 +41,28 @@ Feature: composable
     And I press "C-w"
     Then I should see "foo baz"
 
+  Scenario: C-k with active region
+    When I insert "foo bar baz"
+    And I select " bar"
+    And I press "C-k"
+    Then I should see "foo baz"
+
   Scenario: Pass prefix argument along to action
     # Fixme
 
-  Scenario: Deleting word with forward word
+  Scenario: Kill word with forward word
     When I insert "first second third fourth"
     And I place the cursor after "first"
     And I press "C-w f"
     Then I should see "first third fourth"
 
-  Scenario: Delete paragraph
+  Scenario: Delete word with forward word
+    When I insert "first second third fourth"
+    And I place the cursor after "first"
+    And I press "C-k f"
+    Then I should see "first third fourth"
+
+  Scenario: Kill paragraph
     When I insert:
     """
     Foo
@@ -79,6 +105,21 @@ Feature: composable
       3. line
     """
 
+  Scenario: C-k to delete line
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "2."
+    And I press "C-k l"
+    Then I should see:
+    """
+      1. line
+      3. line
+    """
+
   Scenario: Kill line by repeating action
     When I insert:
     """
@@ -88,6 +129,21 @@ Feature: composable
     """
     And I place the cursor after "2."
     And I press "C-w C-w"
+    Then I should see:
+    """
+      1. line
+      3. line
+    """
+
+  Scenario: Delete line by repeating action
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "2."
+    And I press "C-k C-k"
     Then I should see:
     """
       1. line
@@ -105,6 +161,17 @@ Feature: composable
     And I press "C-w C-w C-w"
     Then I should not see "3. line"
 
+  Scenario: Delete several lines by repeating action
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "2."
+    And I press "C-k C-k C-k"
+    Then I should not see "3. line"
+
   Scenario: Kill several lines
     When I insert:
     """
@@ -114,6 +181,20 @@ Feature: composable
     """
     And I place the cursor after "1."
     And I press "C-w 2 l"
+    Then I should see:
+    """
+      3. line
+    """
+
+  Scenario: Delete several lines
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "1."
+    And I press "C-k 2 l"
     Then I should see:
     """
       3. line
@@ -129,6 +210,25 @@ Feature: composable
     And I place the cursor after "2."
     And I start an action chain
     And I press "C-w"
+    And I press "-"
+    And I press "l"
+    And I execute the action chain
+    Then I should see:
+    """
+    2. line
+    3. line
+    """
+
+  Scenario: Delete line backwards
+    When I insert:
+    """
+    1. line
+    2. line
+    3. line
+    """
+    And I place the cursor after "2."
+    And I start an action chain
+    And I press "C-k"
     And I press "-"
     And I press "l"
     And I execute the action chain
@@ -352,10 +452,22 @@ Feature: composable
     And I press "C-w w"
     Then I should see "first  third fourth"
 
+  Scenario: Delete a word
+    When I insert "first second third fourth"
+    And I place the cursor after "sec"
+    And I press "C-k w"
+    Then I should see "first  third fourth"
+
   Scenario: Kill several words with repeat
     When I insert "first second third fourth"
     And I place the cursor after "fi"
     And I press "C-w 2 w w"
+    Then I should see pattern "^ fourth$"
+
+  Scenario: Delete several words with repeat
+    When I insert "first second third fourth"
+    And I place the cursor after "fi"
+    And I press "C-k 2 w w"
     Then I should see pattern "^ fourth$"
 
   Scenario: Kill several words with repeat backwards
