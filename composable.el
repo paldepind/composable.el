@@ -77,7 +77,7 @@
   :type 'boolean)
 
 (defcustom composable-object-cursor (and (display-graphic-p)
-					 'composable-half-cursor)
+                                         'composable-half-cursor)
   "Use a custom face for the cursor when in object mode.
 This can be either a function or any value accepted by
 `cursor-type'."
@@ -124,7 +124,7 @@ The arguments FORMAT-STRING and ARGS are the same than in the
 `message' function."
   (if (> composable-mode-debug-level 0)
       (let ((inhibit-message (< composable-mode-debug-level 2)))
-	(apply #'message format-string args))))
+        (apply #'message format-string args))))
 
 (defun composable-create-composable (command)
   "Take a function and return it in a composable wrapper.
@@ -133,15 +133,15 @@ specifies and call COMMAND on the region."
   (lambda (arg)
     (interactive "P")
     (cond ((or (region-active-p)
-	       (bound-and-true-p multiple-cursors-mode))
-	   (setq composable--count 0)
+               (bound-and-true-p multiple-cursors-mode))
+           (setq composable--count 0)
            (call-interactively command))
           (composable-object-mode
            (setq this-command composable-twice-mark)
            (funcall composable-twice-mark arg))
           (t
            (setq composable--command-prefix arg
-		 composable--command command)
+                 composable--command command)
            (composable-object-mode)))))
 
 (defun composable-def (commands)
@@ -173,8 +173,8 @@ For each function named foo a function name composable-foo is created."
     (let ((current-prefix-arg composable--command-prefix))
       (call-interactively command)
       (if (= composable--count 1)
-	  (push-mark (point) t)
-	(set-mark (point)))
+          (push-mark (point) t)
+        (set-mark (point)))
       (goto-char (marker-position composable--start-point)))))
 
 (defun composable--repeater (command object direction)
@@ -199,29 +199,29 @@ For each function named foo a function name composable-foo is created."
 (defun composable-object--start ()
   "Action to perform when starting composable."
   (when (and composable-mode-line-color  ;; Mode-line
-	     (color-supported-p composable-mode-line-color))
+             (color-supported-p composable-mode-line-color))
     (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
     (set-face-attribute 'mode-line nil :background composable-mode-line-color))
 
   (when composable-object-cursor       ;; "Change cursor cursor to C"
     (setq composable--saved-cursor cursor-type
-	  cursor-type (or (and (functionp composable-object-cursor)
-			       (funcall composable-object-cursor))
-			  composable-object-cursor)))
+          cursor-type (or (and (functionp composable-object-cursor)
+                               (funcall composable-object-cursor))
+                          composable-object-cursor)))
 
   (setq composable--start-point (point-marker)
-	composable--border-point composable--start-point
-	composable--count 0
-	composable--last-input nil)
+        composable--border-point composable--start-point
+        composable--count 0
+        composable--last-input nil)
 
   (push-mark nil t)
 
   ;; which-key
   (when (and composable-which-keys
-	     (bound-and-true-p which-key-mode))
+             (bound-and-true-p which-key-mode))
     (setq composable--which-key-timer
-	  (run-with-idle-timer which-key-idle-delay nil
-			       #'which-key-show-keymap 'composable-object-mode-map t)))
+          (run-with-idle-timer which-key-idle-delay nil
+                               #'which-key-show-keymap 'composable-object-mode-map t)))
 
   (add-hook 'post-command-hook #'composable--post-command-hook-handler)
   (composable-mode-debug-message "Start composable-object-mode (command: %s)" this-command))
@@ -250,7 +250,7 @@ For each function named foo a function name composable-foo is created."
   (let ((map (make-sparse-keymap)))
     (define-key map key def)
     (if (characterp composable--last-input)
-	(define-key map (string composable--last-input) def))
+        (define-key map (string composable--last-input) def))
     map))
 
 (defun composable--activate-repeat (object)
@@ -260,7 +260,7 @@ For each function named foo a function name composable-foo is created."
    (composable--singleton-map
     (vector last-command-event)
     (composable--repeater composable--command object
-			  (composable--direction last-prefix-arg)))
+                          (composable--direction last-prefix-arg)))
    t
    'composable--object-exit))
 
@@ -268,15 +268,15 @@ For each function named foo a function name composable-foo is created."
   "Handle prefix arg where the COMMAND is paired in PAIRS."
   (let ((pair (gethash command composable--fn-pairs)))
     (cond (pair
-	   (push-mark)
-	   (call-interactively pair))
+           (push-mark)
+           (call-interactively pair))
           (mark-active
-	   (if (eq composable--prefix-arg 'composable-begin)
-	       (progn
-		 (set-mark (min (mark t) composable--start-point))
-		 (goto-char (min (point) composable--start-point)))
-	     (set-mark (max (mark t) composable--start-point))
-	     (goto-char (max (point) composable--start-point)))))))
+           (if (eq composable--prefix-arg 'composable-begin)
+               (progn
+                 (set-mark (min (mark t) composable--start-point))
+                 (goto-char (min (point) composable--start-point)))
+             (set-mark (max (mark t) composable--start-point))
+             (goto-char (max (point) composable--start-point)))))))
 
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-object-mode is on."
@@ -322,42 +322,36 @@ For each function named foo a function name composable-foo is created."
 (fset 'composable-copy-region-as-kill
       (composable-create-composable
        (lambda (mark point)
-	 (interactive (list (mark) (point)))
+         (interactive (list (mark) (point)))
 
-	 (when (> composable--count 0)
-	   (if (marker-position composable--start-point)
-	       (move-overlay composable--overlay
-			     (min point composable--border-point mark)
-			     (max point composable--border-point mark))
-	     (move-overlay composable--overlay (region-beginning) (region-end)))
+         (when (> composable--count 0)
+           (if (marker-position composable--start-point)
+               (move-overlay composable--overlay
+                             (min point composable--border-point mark)
+                             (max point composable--border-point mark))
+             (move-overlay composable--overlay (region-beginning) (region-end)))
 
-	   (when (and (> composable--count 1)
-		      composable-repeat-copy-save-last)
-	     (setq last-command 'kill-region)))
+           (when (and (> composable--count 1)
+                      composable-repeat-copy-save-last)
+             (setq last-command 'kill-region)))
 
-	 (copy-region-as-kill mark point))))
+         (copy-region-as-kill mark point))))
 
 (defun composable-goto-char (arg char)
   (interactive (list (prefix-numeric-value current-prefix-arg)
-		     (or composable--last-input
-			 (read-char "char: " t))))
+                     (or composable--last-input
+                         (read-char "char: " t))))
   (if (and (not composable--last-input)
-	   (char-table-p translation-table-for-input))
+           (char-table-p translation-table-for-input))
       (setq composable--last-input (or (aref translation-table-for-input char) char))
     (setq composable--last-input char))
   (search-forward (char-to-string composable--last-input) nil nil arg))
 
+
 (defvar composable-object-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "1") #'digit-argument)
-    (define-key map (kbd "2") #'digit-argument)
-    (define-key map (kbd "3") #'digit-argument)
-    (define-key map (kbd "4") #'digit-argument)
-    (define-key map (kbd "5") #'digit-argument)
-    (define-key map (kbd "6") #'digit-argument)
-    (define-key map (kbd "7") #'digit-argument)
-    (define-key map (kbd "8") #'digit-argument)
-    (define-key map (kbd "9") #'digit-argument)
+    `(,(dotimes (i 10)
+         (define-key map (kbd (format "%d" i)) #'digit-argument)))
     (define-key map (kbd "-") #'negative-argument)
     (define-key map (kbd ",") #'composable-begin-argument)
     (define-key map (kbd ".") #'composable-end-argument)
@@ -389,7 +383,7 @@ For each function named foo a function name composable-foo is created."
 (define-minor-mode composable-object-mode
   "Composable mode."
   :lighter (and (> composable-mode-debug-level 1)
-		" Composable object")
+                " Composable object")
   :keymap composable-object-mode-map
   (if composable-object-mode
       (composable-object--start)
@@ -397,13 +391,13 @@ For each function named foo a function name composable-foo is created."
     ;; else
     (remove-hook 'post-command-hook #'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil
-	  composable--command nil)
+          composable--command nil)
 
     (when (bound-and-true-p which-key-mode)
       (cancel-timer composable--which-key-timer))
 
     (when (or (called-interactively-p 'any)
-	      (not composable-repeat))
+              (not composable-repeat))
       (composable--object-exit)
       (deactivate-mark))))
 
@@ -432,14 +426,14 @@ For each function named foo a function name composable-foo is created."
   :keymap composable-mode-map
   (if composable-mode
       (progn
-	(setq composable--overlay (make-overlay 0 0))
+        (setq composable--overlay (make-overlay 0 0))
 
-	(overlay-put composable--overlay 'priority 999)
-	(overlay-put composable--overlay 'face 'composable-highlight)
-	;; associate the overlay with no specific buffer. Otherwise it
-	;; may be not visible when set for the first time and appear
-	;; visible when not expected.
-	(delete-overlay composable--overlay))
+        (overlay-put composable--overlay 'priority 999)
+        (overlay-put composable--overlay 'face 'composable-highlight)
+        ;; associate the overlay with no specific buffer. Otherwise it
+        ;; may be not visible when set for the first time and appear
+        ;; visible when not expected.
+        (delete-overlay composable--overlay))
     (setq composable--overlay nil)))
 
 (defun composable--deactivate-mark-hook-handler ()
@@ -450,8 +444,8 @@ For each function named foo a function name composable-foo is created."
   "Advice for `set-mark-command'.
 Activates composable-object-mode unless ARG is non-nil."
   (unless (or composable-object-mode
-	      arg
-	      (bound-and-true-p multiple-cursors-mode))
+              arg
+              (bound-and-true-p multiple-cursors-mode))
     (setq composable--expand t)
     (composable-object-mode 1)))
 

@@ -39,7 +39,7 @@ Between the line above if ARG is negative otherwise below."
   (interactive "p")
   (forward-line arg)
   (cl-flet ((move (dir)
-		  (if (< 0 dir)
+                  (if (< 0 dir)
                       (skip-chars-forward "[:space:]\n")
                     (skip-chars-backward "[:space:]\n"))))
     (when (< arg 0) (end-of-line))
@@ -58,8 +58,8 @@ The movement must mark backwards with negative arguments."
        (setq composable--border-point (point-marker))
        (set-mark (point))
        (if (< 0 amount)
-	   (goto-char (min (mark t) (point)))
-	 (goto-char (max (mark t) (point)))))
+           (goto-char (min (mark t) (point)))
+         (goto-char (max (mark t) (point)))))
      (funcall ,forward amount)))
 
 (defun composable-mark-line (arg)
@@ -90,7 +90,7 @@ Supports negative arguments and repeating."
   "Up-list ARG times with better quotes support."
   (let ((syntax-ppss (syntax-ppss)))
     (if (nth 3 syntax-ppss)
-	(goto-char (nth 8 syntax-ppss))
+        (goto-char (nth 8 syntax-ppss))
       (up-list arg))))
 
 (defun composable-mark-up-list (arg)
