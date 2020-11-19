@@ -108,8 +108,7 @@ This can be either a function or any value accepted by
 (defvar composable--command nil)
 (defvar composable--count 0)                 ;; Count the repeated times
 (defvar composable--prefix-arg nil)
-(defvar composable--start-point (make-marker))
-(defvar composable--border-point nil)
+(defvar composable--start-marker (make-marker))
 (defvar composable--command-prefix nil)
 (defvar composable--saved-cursor nil)
 (defvar composable--expand nil)
@@ -183,7 +182,7 @@ For each function named foo a function name composable-foo is created."
       (if (= composable--count 1)
           (push-mark (point) t)
         (set-mark (point)))
-      (goto-char (marker-position composable--start-point)))))
+      (goto-char composable--start-marker))))
 
 (defun composable--repeater (command object direction)
   "Preserve point at POINT-MARKER when doing COMMAND.
@@ -218,8 +217,7 @@ Executes on OBJECT in LAST-PREFIX direction."
                                (funcall composable-object-cursor))
                           composable-object-cursor)))
 
-  (setq composable--start-point (point-marker)
-        composable--border-point composable--start-point
+  (setq composable--start-marker (point-marker)
         composable--count 0
         composable--char-input nil)
 
@@ -240,8 +238,7 @@ Executes on OBJECT in LAST-PREFIX direction."
   "Actions to perform every time composable exits."
 
   (composable-mode-debug-message "Exit composable-object-mode")
-  (set-marker composable--start-point nil)
-  (set-marker composable--border-point nil)
+  (set-marker composable--start-marker nil)
 
   (when composable--saved-cursor
    (setq cursor-type composable--saved-cursor))
@@ -283,10 +280,10 @@ Executes on OBJECT in LAST-PREFIX direction."
           (mark-active
            (if (eq composable--prefix-arg 'composable-begin)
                (progn
-                 (set-mark (min (mark t) composable--start-point))
-                 (goto-char (min (point) composable--start-point)))
-             (set-mark (max (mark t) composable--start-point))
-             (goto-char (max (point) composable--start-point)))))))
+                 (set-mark (min (mark t) composable--start-marker))
+                 (goto-char (min (point) composable--start-marker)))
+             (set-mark (max (mark t) composable--start-marker))
+             (goto-char (max (point) composable--start-marker)))))))
 
 (defun composable--post-command-hook-handler ()
   "Called after each command when composable-object-mode is on."
@@ -318,11 +315,9 @@ Executes on OBJECT in LAST-PREFIX direction."
          (interactive (list (mark) (point)))
 
          (when (> composable--count 0)
-           (if (marker-position composable--start-point)
-               (move-overlay composable--overlay
-                             (min point composable--border-point mark)
-                             (max point composable--border-point mark))
-             (move-overlay composable--overlay (region-beginning) (region-end)))
+           (move-overlay composable--overlay
+                         (min point composable--start-marker mark)
+                         (max point composable--start-marker mark))
 
            (when (and (> composable--count 1)
                       composable-repeat-copy-save-last)
