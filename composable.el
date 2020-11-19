@@ -77,13 +77,13 @@
   :type 'boolean)
 
 (defcustom composable-object-cursor (and (display-graphic-p)
-                                         'composable-half-cursor)
+                                         #'composable-half-cursor)
   "Use a custom face for the cursor when in object mode.
 This can be either a function or any value accepted by
 `cursor-type'."
   :type 'function)
 
-(defcustom composable-twice-mark 'composable-mark-line
+(defcustom composable-twice-mark #'composable-mark-line
   "Thing to mark when a composable command is called twice successively."
   :type 'function)
 
@@ -132,14 +132,14 @@ The returned function will ask for an object, mark the region it
 specifies and call COMMAND on the region."
   (lambda (arg)
     (interactive "P")
-    (cond ((or (region-active-p)
+    (cond ((or (region-active-p) ;; With region
                (bound-and-true-p multiple-cursors-mode))
            (setq composable--count 0)
            (call-interactively command))
-          (composable-object-mode
+          (composable-object-mode ;; Repeated
            (setq this-command composable-twice-mark)
            (funcall composable-twice-mark arg))
-          (t
+          (t                      ;; First call no region
            (setq composable--command-prefix arg
                  composable--command command)
            (composable-object-mode)))))
@@ -178,7 +178,8 @@ For each function named foo a function name composable-foo is created."
       (goto-char (marker-position composable--start-point)))))
 
 (defun composable--repeater (command object direction)
-  "Preserve point at POINT-MARKER when doing COMMAND on OBJECT in DIRECTION."
+  "Preserve point at POINT-MARKER when doing COMMAND.
+Executes on OBJECT in LAST-PREFIX direction."
   (lambda ()
     (interactive)
     (unless composable--expand
@@ -236,10 +237,8 @@ For each function named foo a function name composable-foo is created."
 
   (when composable--saved-cursor
    (setq cursor-type composable--saved-cursor))
-
   (when composable--saved-mode-line-color
     (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color))
-
   (when composable--overlay
     (delete-overlay composable--overlay))
 
@@ -262,9 +261,9 @@ For each function named foo a function name composable-foo is created."
    (composable--singleton-map
     (vector last-command-event)
     (composable--repeater composable--command object
-                          (composable--direction last-prefix-arg)))
+			  (composable--direction last-prefix-arg)))
    t
-   'composable--object-exit))
+   #'composable--object-exit))
 
 (defun composable--handle-prefix (command)
   "Handle prefix arg where the COMMAND is paired in PAIRS."
@@ -335,7 +334,7 @@ For each function named foo a function name composable-foo is created."
 
            (when (and (> composable--count 1)
                       composable-repeat-copy-save-last)
-             (setq last-command 'kill-region)))
+             (setq last-command #'kill-region)))
 
          (copy-region-as-kill mark point))))
 
