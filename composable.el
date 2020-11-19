@@ -115,7 +115,7 @@ This can be either a function or any value accepted by
 (defvar composable--saved-cursor nil)
 (defvar composable--expand nil)
 (defvar composable--which-key-timer nil)
-(defvar composable--last-input nil)
+(defvar composable--char-input nil)
 
 (defsubst composable-mode-debug-message (format-string &rest args)
   "Print messages only when `composable-mode-debug' is `non-nil'.
@@ -212,7 +212,7 @@ For each function named foo a function name composable-foo is created."
   (setq composable--start-point (point-marker)
         composable--border-point composable--start-point
         composable--count 0
-        composable--last-input nil)
+        composable--char-input nil)
 
   (push-mark nil t)
 
@@ -249,8 +249,10 @@ For each function named foo a function name composable-foo is created."
   "Create a map with a single KEY with definition DEF."
   (let ((map (make-sparse-keymap)))
     (define-key map key def)
-    (if (characterp composable--last-input)
-        (define-key map (string composable--last-input) def))
+    ;; When using composable char can repeat the char to repeat the
+    ;; command
+    (if (characterp composable--char-input)
+        (define-key map (string composable--char-input) def))
     map))
 
 (defun composable--activate-repeat (object)
@@ -337,15 +339,12 @@ For each function named foo a function name composable-foo is created."
 
          (copy-region-as-kill mark point))))
 
-(defun composable-goto-char (arg char)
-  (interactive (list (prefix-numeric-value current-prefix-arg)
-                     (or composable--last-input
-                         (read-char "char: " t))))
-  (if (and (not composable--last-input)
-           (char-table-p translation-table-for-input))
-      (setq composable--last-input (or (aref translation-table-for-input char) char))
-    (setq composable--last-input char))
-  (search-forward (char-to-string composable--last-input) nil nil arg))
+(defun composable-goto-char (arg)
+  "Goto-char command for composable."
+  (interactive "p")
+  (unless composable--char-input
+    (setq composable--char-input (read-char "char: " t)))
+  (search-forward (char-to-string composable--char-input) nil nil arg))
 
 
 (defvar composable-object-mode-map
