@@ -266,14 +266,14 @@ Executes on OBJECT in LAST-PREFIX direction."
    (composable--singleton-map
     (vector last-command-event)
     (composable--repeater composable--command object
-			  (composable--direction last-prefix-arg)))
+                          (composable--direction last-prefix-arg)))
    t
    #'composable--object-exit))
 
 (defun composable--handle-prefix (command)
   "Handle prefix arg where the COMMAND is paired in PAIRS."
   (let ((pair (or (alist-get command composable-fn-pair-alist)
-		  (car (rassq command composable-fn-pair-alist)))))
+                  (car (rassq command composable-fn-pair-alist)))))
     (cond (pair
            (push-mark)
            (call-interactively pair))
@@ -367,8 +367,8 @@ Executes on OBJECT in LAST-PREFIX direction."
 
 (define-minor-mode composable-object-mode
   "Composable mode."
-  :lighter (and (> composable-mode-debug-level 1)
-                " Composable object")
+  :lighter (if (> composable-mode-debug-level 1)
+               " Composable object" "")
   :keymap composable-object-mode-map
   (if composable-object-mode
       (composable-object--start)
