@@ -458,13 +458,13 @@ Feature: composable
     And I press "C-k w"
     Then I should see "first  third fourth"
 
-  Scenario: Kill several words with repeat
+  Scenario: Kill several words with numeric and repeat
     When I insert "first second third fourth"
     And I place the cursor after "fi"
     And I press "C-w 2 w w"
     Then I should see pattern "^ fourth$"
 
-  Scenario: Delete several words with repeat
+  Scenario: Delete several words with numeric and repeat
     When I insert "first second third fourth"
     And I place the cursor after "fi"
     And I press "C-k 2 w w"
@@ -488,10 +488,16 @@ Feature: composable
     And I press "C-w y"
     Then I should see "(first-symbol second  fourth)"
 
-  Scenario: Kill several symbols with repeat
+  Scenario: Kill several symbols with numeric and repeat
     When I insert "(first-symbol second third_symbol fourth)"
     And I place the cursor after "fi"
     And I press "C-w 2 y y"
+    Then I should see "( fourth)"
+
+  Scenario: Kill several symbols with zero start numeric and repeat
+    When I insert "(first-symbol second third_symbol fourth)"
+    And I place the cursor after "fi"
+    And I press "C-w 02 y y"
     Then I should see "( fourth)"
 
   Scenario: Kill several symbols with repeat backwards
@@ -604,6 +610,13 @@ Feature: composable
     When I insert "first second third forth fifth"
     And I place the cursor before "second"
     And I press "M-w c t t"
+    And I press "C-y"
+    Then I should see "first second third fortsecond third forth fifth"
+
+  Scenario: Copy with goto-char with numeric repeating inplace
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "M-w 2 c t"
     And I press "C-y"
     Then I should see "first second third fortsecond third forth fifth"
 
