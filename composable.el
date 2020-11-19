@@ -110,12 +110,20 @@ This can be either a function or any value accepted by
 (defvar composable--prefix-arg nil)
 (defvar composable--start-point (make-marker))
 (defvar composable--border-point nil)
-(defvar composable--fn-pairs (make-hash-table :test 'equal))
 (defvar composable--command-prefix nil)
 (defvar composable--saved-cursor nil)
 (defvar composable--expand nil)
 (defvar composable--which-key-timer nil)
 (defvar composable--char-input nil)
+
+(defcustom composable-fn-pair-alist
+  '((forward-word . backward-word)
+    (move-end-of-line . back-to-indentation)
+    (next-line . previous-line)
+    (forward-paragraph . backward-paragraph)
+    (forward-sentence . backward-sentence))
+  "Alist with pairs of functions."
+  :type '(alist :key-type symbol :value-type symbol))
 
 (defsubst composable-mode-debug-message (format-string &rest args)
   "Print messages only when `composable-mode-debug' is `non-nil'.
@@ -190,7 +198,7 @@ Executes on OBJECT in LAST-PREFIX direction."
       (call-interactively object))
     (composable--call-excursion command)))
 
-(defvar composable--arguments
+(defconst composable--arguments
   '(universal-argument
     digit-argument
     negative-argument
@@ -267,7 +275,8 @@ Executes on OBJECT in LAST-PREFIX direction."
 
 (defun composable--handle-prefix (command)
   "Handle prefix arg where the COMMAND is paired in PAIRS."
-  (let ((pair (gethash command composable--fn-pairs)))
+  (let ((pair (or (alist-get command composable-fn-pair-alist)
+		  (car (rassq command composable-fn-pair-alist)))))
     (cond (pair
            (push-mark)
            (call-interactively pair))
@@ -292,23 +301,6 @@ Executes on OBJECT in LAST-PREFIX direction."
       (composable--activate-repeat this-command))
     (composable--call-excursion composable--command)
     (composable-object-mode -1))))
-
-(defun composable-add-pair (fn1 fn2)
-  "Take two commands FN1 and FN2 and add them as pairs."
-  (puthash fn2 fn1 composable--fn-pairs)
-  (puthash fn1 fn2 composable--fn-pairs))
-
-(defun composable-add-pairs (pairs)
-  "Add a list of PAIRS."
-  (dolist (p pairs)
-    (composable-add-pair (car p) (cadr p))))
-
-(composable-add-pairs
- '((forward-word backward-word)
-   (move-end-of-line back-to-indentation)
-   (next-line previous-line)
-   (forward-paragraph backward-paragraph)
-   (forward-sentence backward-sentence)))
 
 (defun composable-begin-argument ()
   "Set prefix argument to end."

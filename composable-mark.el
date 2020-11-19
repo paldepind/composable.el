@@ -29,7 +29,7 @@
 (defvar composable--border-point)
 (defvar composable--count)
 
-(defun composable--direction (arg)
+(defsubst composable--direction (arg)
   "Direction of ARG."
   (let ((n (prefix-numeric-value arg))) (/ n (abs n))))
 

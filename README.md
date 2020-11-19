@@ -273,16 +273,13 @@ end. But <kbd>C-w , h</kbd> will kill one paragraph backwards and
 
 ### With pair movements
 
-With the function `composable-add-pair` you can define movement
-commands to be each others pair. For instance the following pair is
-defined by default.
+The variable `composable-fn-pair-alist` define movement commands
+to be each others pair. For instance the following pair is defined by
+default.
 
 ```lisp
-(composable-add-pair 'forward-word 'backward-word)
+(add-to-list 'composable-fn-pair-alist '(forward-word . backward-word))
 ```
-
-Alternatively multiple several pairs can be defined with
-`composable-add-pairs`.
 
 When a prefix argument is specified before a paired movement command
 (begin and end are treated the same) the two commands are used to
