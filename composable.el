@@ -356,7 +356,7 @@ Executes on OBJECT in LAST-PREFIX direction."
     (define-key map (kbd "h") #'composable-mark-paragraph)
     (define-key map (kbd "j") #'composable-mark-join)
     (define-key map (kbd "o") #'composable-mark-up-list)
-    (define-key map (kbd "g") #'composable-object-mode-disable)
+    (define-key map (kbd "g") #'keyboard-quit)
     map)
   "Keymap for composable-object-mode commands after entering.")
 
