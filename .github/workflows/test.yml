@@ -14,18 +14,24 @@ jobs:
           - '27.1'
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
       - uses: purcell/setup-emacs@master
         with:
           version: ${{ matrix.emacs_version }}
+
       - uses: conao3/setup-cask@master
+        with:
+          version: 'snapshot'
 
       - name: Build
-        shell: bash
         run: cask
 
       - name: Test
-        shell: bash
         run: make test
 
 # A pretty complete example
 # https://github.com/szermatt/emacs-bash-completion/blob/fa5557709ee11b41a2b5393efe60cd464c56f76e/.github/workflows/test.yml
+
