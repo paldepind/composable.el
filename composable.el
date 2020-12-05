@@ -91,10 +91,6 @@ This can be either a function or any value accepted by
   "Color for mode-line background when composable is active."
   :type 'color)
 
-(defcustom composable-copy-active-region-highlight t
-  "Use composable highlight when kilkling preselected region."
-  :type 'boolean)
-
 (defcustom composable-mode-debug-level 1
   "Print verbose information when composable modes toggle."
   :type 'integer)
@@ -231,6 +227,7 @@ Executes on OBJECT in LAST-PREFIX direction."
                                #'which-key-show-keymap 'composable-object-mode-map t)))
 
   (add-hook 'post-command-hook #'composable--post-command-hook-handler)
+  (advice-add 'keyboard-quit :before #'composable-object-mode-disable)
   (composable-mode-debug-message "Start composable-object-mode (command: %s)" this-command))
 
 
@@ -247,6 +244,7 @@ Executes on OBJECT in LAST-PREFIX direction."
   (when composable--overlay
     (delete-overlay composable--overlay))
 
+  (advice-remove 'keyboard-quit #'composable-object-mode-disable)
   (setq composable--expand nil))  ;; By default the commands don't expand
 
 (defun composable--singleton-map (key def)
@@ -359,8 +357,6 @@ Executes on OBJECT in LAST-PREFIX direction."
     (define-key map (kbd "j") #'composable-mark-join)
     (define-key map (kbd "o") #'composable-mark-up-list)
     (define-key map (kbd "g") #'composable-object-mode-disable)
-    (define-key map [remap keyboard-escape-quit] #'composable-object-mode-disable)
-    (define-key map [remap keyboard-quit] #'composable-object-mode-disable)
     map)
   "Keymap for composable-object-mode commands after entering.")
 
