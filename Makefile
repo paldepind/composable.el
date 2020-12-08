@@ -13,3 +13,6 @@ test:
 plain:
 	$(EMACS) --version
 	$(EMACS) $(LOAD) -f composable-mode -f composable-mark-mode
+
+compile:
+	${EMACS} -Q --batch -L . -f batch-byte-compile composable.el composable-*.el
