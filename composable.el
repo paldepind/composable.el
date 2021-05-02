@@ -133,37 +133,37 @@ The arguments FORMAT-STRING and ARGS are the same than in the
   "Take a function and return it in a composable wrapper.
 The returned function will ask for an object, mark the region it
 specifies and call COMMAND on the region."
-  (lambda (arg)
-    (interactive "P")
-    (cond ((or (region-active-p) ;; With region
-               (bound-and-true-p multiple-cursors-mode))
-           (setq composable--count 0)
-           (call-interactively command))
-          (composable-object-mode ;; Repeated
-           (setq this-command composable-twice-mark)
-           (funcall composable-twice-mark arg))
-          (t                      ;; First call no region
-           (setq composable--command-prefix arg
-                 composable--command command)
-           (composable-object-mode)))))
+  `(defun ,(intern (concat "composable-" (symbol-name `,command))) (arg)
+     ,(format "Composable wrapper for `%s'" (symbol-name command))
+     (interactive "P")
+     (cond ((or (region-active-p) ;; With region
+		(bound-and-true-p multiple-cursors-mode))
+	    (setq composable--count 0)
+	    (call-interactively #',command))
+           (composable-object-mode ;; Repeated
+	    (setq this-command composable-twice-mark)
+	    (funcall composable-twice-mark arg))
+           (t                      ;; First call no region
+	    (setq composable--command-prefix arg
+                  composable--command #',command)
+	    (composable-object-mode)))))
 
-(defun composable-def (commands)
+(defmacro composable-def ()
   "Define composable function from a list COMMANDS.
 The list should contain functions operating on regions.
 For each function named foo a function name composable-foo is created."
-  (dolist (c commands)
-    (fset (intern (concat "composable-" (symbol-name c)))
-          (composable-create-composable c))))
+  `(progn ,@(mapcar
+             #'composable-create-composable
+             '(kill-region
+	       kill-ring-save
+	       indent-region
+	       comment-or-uncomment-region
+	       smart-comment-region
+	       upcase-region
+	       downcase-region
+	       delete-region))))
 
-(composable-def
- '(kill-region
-   kill-ring-save
-   indent-region
-   comment-or-uncomment-region
-   smart-comment-region
-   upcase-region
-   downcase-region
-   delete-region))
+(composable-def)
 
 (defun composable-half-cursor ()
   "Change cursor to a half-height box."
@@ -307,22 +307,6 @@ Executes on OBJECT in LAST-PREFIX direction."
   (interactive)
   (setq composable--prefix-arg 'composable-end))
 
-(fset 'composable-copy-region-as-kill
-      (composable-create-composable
-       (lambda (mark point)
-         (interactive (list (mark) (point)))
-
-         (when (> composable--count 0)
-           (move-overlay composable--overlay
-                         (min point composable--start-marker mark)
-                         (max point composable--start-marker mark))
-
-           (when (and (> composable--count 1)
-                      composable-repeat-copy-save-last)
-             (setq last-command #'kill-region)))
-
-         (copy-region-as-kill mark point))))
-
 (defun composable-goto-char (arg)
   "Goto-char command for composable."
   (interactive "p")
@@ -330,36 +314,47 @@ Executes on OBJECT in LAST-PREFIX direction."
     (setq composable--char-input (read-char "char: " t)))
   (search-forward (char-to-string composable--char-input) nil nil arg))
 
+(defun copy-region-as-kill-advise (beg end &optional region)
+  "Extra advise for copy-region-as-kill to enable the overlay.
 
-(defvar composable-object-mode-map
-  (let ((map (make-sparse-keymap)))
-    `(,(dotimes (i 10)
-         (define-key map (kbd (format "%d" i)) #'digit-argument)))
-    (define-key map (kbd "-") #'negative-argument)
-    (define-key map (kbd ",") #'composable-begin-argument)
-    (define-key map (kbd ".") #'composable-end-argument)
-    (define-key map (kbd "a") #'move-beginning-of-line)
-    (define-key map (kbd "c") #'composable-goto-char)
-    (define-key map (kbd "e") #'move-end-of-line)
-    (define-key map (kbd "f") #'forward-word)
-    (define-key map (kbd "b") #'backward-word)
-    (define-key map (kbd "u") #'mark-whole-buffer)
-    (define-key map (kbd "n") #'next-line)
-    (define-key map (kbd "p") #'previous-line)
-    (define-key map (kbd "l") #'composable-mark-line)
-    (define-key map (kbd "{") #'backward-paragraph)
-    (define-key map (kbd "}") #'forward-paragraph)
-    (define-key map (kbd "s") #'mark-sexp)
-    (define-key map (kbd "m") #'back-to-indentation)
-    (define-key map (kbd "w") #'composable-mark-word)
-    (define-key map (kbd "y") #'composable-mark-symbol)
-    (define-key map (kbd "h") #'composable-mark-paragraph)
-    (define-key map (kbd "j") #'composable-mark-join)
-    (define-key map (kbd "o") #'composable-mark-up-list)
-    (define-key map (kbd "g") #'keyboard-quit)
-    map)
+This also prevents messing the clipboard."
+  (interactive (list (mark) (point) 'region))
+  (when (> composable--count 0)
+    (move-overlay composable--overlay
+                  (min beg composable--start-marker end)
+                  (max beg composable--start-marker end))
+
+    (when (and (> composable--count 1)
+               composable-repeat-copy-save-last)
+      (setq last-command #'kill-region))))
+
+(easy-mmode-defmap composable-object-mode-map
+  `(,@(mapcar (lambda (num)
+		(cons (format "%s" num) 'digit-argument))
+	      (number-sequence 0 9))
+    ("-" . negative-argument)
+    ("," . composable-begin-argument)
+    ("." . composable-end-argument)
+    ("a" . move-beginning-of-line)
+    ("c" . composable-goto-char)
+    ("e" . move-end-of-line)
+    ("f" . forward-word)
+    ("b" . backward-word)
+    ("u" . mark-whole-buffer)
+    ("n" . next-line)
+    ("p" . previous-line)
+    ("l" . composable-mark-line)
+    ("{" . backward-paragraph)
+    ("}" . forward-paragraph)
+    ("s" . mark-sexp)
+    ("m" . back-to-indentation)
+    ("w" . composable-mark-word)
+    ("y" . composable-mark-symbol)
+    ("h" . composable-mark-paragraph)
+    ("j" . composable-mark-join)
+    ("o" . composable-mark-up-list)
+    ("g" . keyboard-quit))
   "Keymap for composable-object-mode commands after entering.")
-
 
 (define-minor-mode composable-object-mode
   "Composable mode."
@@ -387,16 +382,14 @@ Executes on OBJECT in LAST-PREFIX direction."
   (when composable-object-mode ;; This check is extremely important
     (funcall-interactively #'composable-object-mode -1)))
 
-(defvar composable-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map [remap kill-region] #'composable-kill-region)
-    (define-key map [remap kill-ring-save] #'composable-copy-region-as-kill)
-    (define-key map [remap comment-dwim] #'composable-comment-or-uncomment-region)
-    (define-key map [remap upcase-region] #'composable-upcase-region)
-    (define-key map [remap downcase-region] #'composable-downcase-region)
-    (define-key map [remap indent-region] #'composable-indent-region)
-    (define-key map [remap kill-line] #'composable-delete-region)
-    map)
+(easy-mmode-defmap composable-mode-map
+  `(([remap kill-region] . composable-kill-region)
+    ([remap kill-ring-save] . composable-kill-ring-save)
+    ([remap comment-dwim] . composable-comment-or-uncomment-region)
+    ([remap upcase-region] . composable-upcase-region)
+    ([remap downcase-region] . composable-downcase-region)
+    ([remap indent-region] . composable-indent-region)
+    ([remap kill-line] . composable-delete-region))
   "Keymap for composable-mode commands after entering.")
 
 ;;;###autoload
@@ -414,8 +407,11 @@ Executes on OBJECT in LAST-PREFIX direction."
         ;; associate the overlay with no specific buffer. Otherwise it
         ;; may be not visible when set for the first time and appear
         ;; visible when not expected.
-        (delete-overlay composable--overlay))
-    (setq composable--overlay nil)))
+        (delete-overlay composable--overlay)
+	(advice-add 'copy-region-as-kill :before #'copy-region-as-kill-advise)
+	)
+    (setq composable--overlay nil)
+    (advice-remove 'copy-region-as-kill #'copy-region-as-kill-advise)))
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave object mode when the mark is disabled."
