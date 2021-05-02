@@ -206,37 +206,6 @@ Executes on OBJECT in LAST-PREFIX direction."
     composable-begin-argument
     composable-end-argument))
 
-(defun composable-object--start ()
-  "Action to perform when starting composable."
-  (when (and composable-mode-line-color  ;; Mode-line
-             (color-supported-p composable-mode-line-color))
-    (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
-    (set-face-attribute 'mode-line nil :background composable-mode-line-color))
-
-  (when composable-object-cursor       ;; "Change cursor cursor to C"
-    (setq composable--saved-cursor cursor-type
-          cursor-type (or (and (functionp composable-object-cursor)
-                               (funcall composable-object-cursor))
-                          composable-object-cursor)))
-
-  (setq composable--start-marker (point-marker)
-        composable--count 0
-        composable--char-input nil)
-
-  (push-mark nil t)
-
-  ;; which-key
-  (when (and composable-which-keys
-             (bound-and-true-p which-key-mode))
-    (setq composable--which-key-timer
-          (run-with-idle-timer which-key-idle-delay nil
-                               #'which-key-show-keymap 'composable-object-mode-map t)))
-
-  (add-hook 'post-command-hook #'composable--post-command-hook-handler)
-  (advice-add 'keyboard-quit :before #'composable-object-mode-disable)
-  (composable-mode-debug-message "Start composable-object-mode (command: %s)" this-command))
-
-
 (defun composable--object-exit ()
   "Actions to perform every time composable exits."
 
@@ -368,7 +337,34 @@ This also prevents messing the clipboard."
                " Composable object" "")
   :keymap composable-object-mode-map
   (if composable-object-mode
-      (composable-object--start)
+      (progn
+	(when (and composable-mode-line-color  ;; Mode-line
+		   (color-supported-p composable-mode-line-color))
+	  (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
+	  (set-face-attribute 'mode-line nil :background composable-mode-line-color))
+
+	(when composable-object-cursor       ;; "Change cursor cursor to C"
+	  (setq composable--saved-cursor cursor-type
+		cursor-type (or (and (functionp composable-object-cursor)
+				     (funcall composable-object-cursor))
+				composable-object-cursor)))
+
+	(setq composable--start-marker (point-marker)
+              composable--count 0
+              composable--char-input nil)
+
+	(push-mark nil t)
+
+	;; which-key
+	(when (and composable-which-keys
+		   (bound-and-true-p which-key-mode))
+	  (setq composable--which-key-timer
+		(run-with-idle-timer which-key-idle-delay nil
+				     #'which-key-show-keymap 'composable-object-mode-map t)))
+
+	(add-hook 'post-command-hook #'composable--post-command-hook-handler)
+	(advice-add 'keyboard-quit :before #'composable-object-mode-disable)
+	(composable-mode-debug-message "Start composable-object-mode (command: %s)" this-command))
 
     ;; else
     (remove-hook 'post-command-hook #'composable--post-command-hook-handler)
@@ -404,8 +400,7 @@ This also prevents messing the clipboard."
         ;; may be not visible when set for the first time and appear
         ;; visible when not expected.
         (delete-overlay composable--overlay)
-	(advice-add 'copy-region-as-kill :before #'copy-region-as-kill-advise)
-	)
+	(advice-add 'copy-region-as-kill :before #'copy-region-as-kill-advise))
     (setq composable--overlay nil)
     (advice-remove 'copy-region-as-kill #'copy-region-as-kill-advise)))
 
