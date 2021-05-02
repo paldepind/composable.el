@@ -120,6 +120,16 @@ This can be either a function or any value accepted by
   "Alist with pairs of functions."
   :type '(alist :key-type symbol :value-type symbol))
 
+(defcustom composable-commands-list '(kill-region
+				      kill-ring-save
+				      indent-region
+				      comment-or-uncomment-region
+				      smart-comment-region
+				      upcase-region
+				      downcase-region
+				      delete-region)
+  "List of replaced functions.")
+
 (defsubst composable-mode-debug-message (format-string &rest args)
   "Print messages only when `composable-mode-debug' is `non-nil'.
 
@@ -152,23 +162,19 @@ specifies and call COMMAND on the region."
   "Define composable function from a list COMMANDS.
 The list should contain functions operating on regions.
 For each function named foo a function name composable-foo is created."
-  `(progn ,@(mapcar
-             #'composable-create-composable
-             '(kill-region
-	       kill-ring-save
-	       indent-region
-	       comment-or-uncomment-region
-	       smart-comment-region
-	       upcase-region
-	       downcase-region
-	       delete-region))))
+  `(progn ,@(mapcar #'composable-create-composable composable-commands-list)
+	  (easy-mmode-defmap composable-mode-map
+	    (mapcar (lambda (command)
+		      `([remap ,command] . ,(intern (concat "composable-" (symbol-name command)))))
+		    composable-commands-list)
+	    "Keymap for composable-mode commands after entering.")))
 
 (composable-def)
 
 (defun composable-half-cursor ()
   "Change cursor to a half-height box."
-  (let ((height (/ (window-pixel-height) (* (window-height) 2))))
-    (setq cursor-type (cons 'hbar height))))
+  (setq cursor-type
+	(cons 'hbar (/ (window-pixel-height) (* (window-height) 2)))))
 
 (defun composable--call-excursion (command)
   "Call COMMAND if set then go to POINT-MARK marker."
@@ -381,16 +387,6 @@ This also prevents messing the clipboard."
   (interactive)
   (when composable-object-mode ;; This check is extremely important
     (funcall-interactively #'composable-object-mode -1)))
-
-(easy-mmode-defmap composable-mode-map
-  `(([remap kill-region] . composable-kill-region)
-    ([remap kill-ring-save] . composable-kill-ring-save)
-    ([remap comment-dwim] . composable-comment-or-uncomment-region)
-    ([remap upcase-region] . composable-upcase-region)
-    ([remap downcase-region] . composable-downcase-region)
-    ([remap indent-region] . composable-indent-region)
-    ([remap kill-line] . composable-delete-region))
-  "Keymap for composable-mode commands after entering.")
 
 ;;;###autoload
 (define-minor-mode composable-mode
