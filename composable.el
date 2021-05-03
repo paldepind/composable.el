@@ -156,7 +156,8 @@ For each function named foo a function name composable-foo is created."
 	  (easy-mmode-defmap composable-mode-map
 	    '(,@(mapcar (lambda (command)
 			  `([remap ,command] . ,(intern (concat "composable-" (symbol-name command)))))
-			commands-list))
+			commands-list)
+	      ([remap kill-line] . composable-delete-region))
 	    "Keymap for composable-mode commands after entering.")))
 
 (composable-def (kill-region
