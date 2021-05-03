@@ -120,16 +120,6 @@ This can be either a function or any value accepted by
   "Alist with pairs of functions."
   :type '(alist :key-type symbol :value-type symbol))
 
-(defcustom composable-commands-list '(kill-region
-				      kill-ring-save
-				      indent-region
-				      comment-or-uncomment-region
-				      smart-comment-region
-				      upcase-region
-				      downcase-region
-				      delete-region)
-  "List of replaced functions.")
-
 (defsubst composable-mode-debug-message (format-string &rest args)
   "Print messages only when `composable-mode-debug' is `non-nil'.
 
@@ -158,18 +148,25 @@ specifies and call COMMAND on the region."
                   composable--command #',command)
 	    (composable-object-mode)))))
 
-(defmacro composable-def ()
+(defmacro composable-def (commands-list)
   "Define composable function from a list COMMANDS.
 The list should contain functions operating on regions.
 For each function named foo a function name composable-foo is created."
-  `(progn ,@(mapcar #'composable-create-composable composable-commands-list)
+  `(progn ,@(mapcar #'composable-create-composable commands-list)
 	  (easy-mmode-defmap composable-mode-map
-	    (mapcar (lambda (command)
-		      `([remap ,command] . ,(intern (concat "composable-" (symbol-name command)))))
-		    composable-commands-list)
+	    '(,@(mapcar (lambda (command)
+			  `([remap ,command] . ,(intern (concat "composable-" (symbol-name command)))))
+			commands-list))
 	    "Keymap for composable-mode commands after entering.")))
 
-(composable-def)
+(composable-def (kill-region
+		 kill-ring-save
+		 indent-region
+		 comment-or-uncomment-region
+		 smart-comment-region
+		 upcase-region
+		 downcase-region
+		 delete-region))
 
 (defun composable-half-cursor ()
   "Change cursor to a half-height box."
