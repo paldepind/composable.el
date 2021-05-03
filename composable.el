@@ -162,7 +162,7 @@ For each function named foo a function name composable-foo is created."
 (composable-def (kill-region
 		 kill-ring-save
 		 indent-region
-		 comment-or-uncomment-region
+		 comment-dwim
 		 upcase-region
 		 downcase-region
 		 delete-region))
