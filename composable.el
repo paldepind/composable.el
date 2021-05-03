@@ -163,7 +163,6 @@ For each function named foo a function name composable-foo is created."
 		 kill-ring-save
 		 indent-region
 		 comment-or-uncomment-region
-		 smart-comment-region
 		 upcase-region
 		 downcase-region
 		 delete-region))
@@ -286,11 +285,11 @@ Executes on OBJECT in LAST-PREFIX direction."
     (setq composable--char-input (read-char "char: " t)))
   (search-forward (char-to-string composable--char-input) nil nil arg))
 
-(defun copy-region-as-kill-advise (beg end &optional region)
+(defun copy-region-as-kill-advise (beg end &optional _)
   "Extra advise for copy-region-as-kill to enable the overlay.
 
 This also prevents messing the clipboard."
-  (interactive (list (mark) (point) 'region))
+  (interactive (list (mark) (point)))
   (when (> composable--count 0)
     (move-overlay composable--overlay
                   (min beg composable--start-marker end)
