@@ -291,7 +291,8 @@ Executes on OBJECT in LAST-PREFIX direction."
 
 This also prevents messing the clipboard."
   (interactive (list (mark) (point)))
-  (when (> composable--count 0)
+  (when (and (marker-position composable--start-marker)
+	     (> composable--count 0))
     (move-overlay composable--overlay
                   (min beg composable--start-marker end)
                   (max beg composable--start-marker end))
