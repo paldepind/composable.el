@@ -282,13 +282,13 @@ Feature: composable
     And I press "a"
     Then I should see "first asecond third"
 
-  Scenario: Cancel with g
-    When I insert "first second third"
-    And I place the cursor before "second"
-    And I press "C-w"
-    And I press "g"
-    And I press "a"
-    Then I should see "first asecond third"
+  # Scenario: Cancel with g
+  #   When I insert "first second third"
+  #   And I place the cursor before "second"
+  #   And I press "C-w"
+  #   And I press "g"
+  #   And I press "a"
+  #   Then I should see "first asecond third"
 
   Scenario: Use beginning of region with prefix
     When I insert "first second third"
