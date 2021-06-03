@@ -56,10 +56,7 @@ The movement must mark backwards with negative arguments."
        (funcall ,forward dir)
        (funcall ,forward (- dir))
        (setq composable--border-point (point-marker))
-       (set-mark (point))
-       (if (< 0 amount)
-           (goto-char (min (mark t) (point)))
-         (goto-char (max (mark t) (point)))))
+       (set-mark (point)))
      (funcall ,forward amount)))
 
 (defun composable-mark-line (arg)
