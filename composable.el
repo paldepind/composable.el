@@ -293,12 +293,18 @@ This also prevents messing the clipboard."
   (interactive (list (mark) (point)))
   (when (and (marker-position composable--start-marker)
 	     (> composable--count 0))
-    (move-overlay composable--overlay
-                  (min beg composable--start-marker end)
-                  (max beg composable--start-marker end))
+    (let ((o-start (min beg composable--start-marker end))
+	  (o-end (max beg composable--start-marker end)))
+
+      ;; Use overlay bounds if set
+      (when (and (overlayp composable--overlay)
+		 (eq (overlay-buffer composable--overlay) (current-buffer)))
+	(setq o-start (min o-start (overlay-start composable--overlay))
+	      o-end (max o-end (overlay-end composable--overlay))))
+      (move-overlay composable--overlay o-start o-end))
 
     (when (and (> composable--count 1)
-               composable-repeat-copy-save-last)
+	       composable-repeat-copy-save-last)
       (setq last-command #'kill-region))))
 
 (easy-mmode-defmap composable-object-mode-map
