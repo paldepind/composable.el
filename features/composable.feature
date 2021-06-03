@@ -295,7 +295,7 @@ Feature: composable
     And I place the cursor before "second"
     And I start an action chain
     And I press "C-w"
-    And I press ","
+    And I press "["
     And I press "l"
     And I execute the action chain
     Then I should see pattern "^second third$"
@@ -305,7 +305,7 @@ Feature: composable
     And I place the cursor before " second"
     And I start an action chain
     And I press "C-w"
-    And I press "."
+    And I press "]"
     And I press "l"
     And I execute the action chain
     Then I should see pattern "^first$"
@@ -315,7 +315,7 @@ Feature: composable
     And I place the cursor before "cond"
     And I start an action chain
     And I press "C-w"
-    And I press ","
+    And I press "["
     And I press "f"
     And I execute the action chain
     Then I should see "first  third"
@@ -325,7 +325,7 @@ Feature: composable
     And I start an action chain
     And I place the cursor before "cond"
     And I press "C-w"
-    And I press "."
+    And I press "]"
     And I press "b"
     And I execute the action chain
     Then I should see "first  third"
@@ -335,7 +335,7 @@ Feature: composable
     And I place the cursor before "oo"
     And I start an action chain
     And I press "C-w"
-    And I press ","
+    And I press "["
     And I press "e"
     And I execute the action chain
     And I insert "bar"
@@ -346,7 +346,7 @@ Feature: composable
     And I place the cursor before "cond"
     And I start an action chain
     And I press "C-SPC"
-    And I press "."
+    And I press "]"
     And I press "b"
     And I execute the action chain
     Then the region should be "second"
@@ -479,31 +479,31 @@ Feature: composable
   Scenario: Kill a symbol
     When I insert "(first-symbol second third_symbol fourth)"
     And I place the cursor after "thir"
-    And I press "C-w y"
+    And I press "C-w ."
     Then I should see "(first-symbol second  fourth)"
 
   Scenario: Kill symbol at beginning
     When I insert "(first-symbol second third_symbol fourth)"
     And I place the cursor before "third"
-    And I press "C-w y"
+    And I press "C-w ."
     Then I should see "(first-symbol second  fourth)"
 
   Scenario: Kill several symbols with numeric and repeat
     When I insert "(first-symbol second third_symbol fourth)"
     And I place the cursor after "fi"
-    And I press "C-w 2 y y"
+    And I press "C-w 2 . ."
     Then I should see "( fourth)"
 
   Scenario: Kill several symbols with zero start numeric and repeat
     When I insert "(first-symbol second third_symbol fourth)"
     And I place the cursor after "fi"
-    And I press "C-w 02 y y"
+    And I press "C-w 02 . ."
     Then I should see "( fourth)"
 
   Scenario: Kill several symbols with repeat backwards
     When I insert "(first second third_symbol &fourth fifth)"
     And I place the cursor after "four"
-    And I press "C-w - y y y"
+    And I press "C-w - . . ."
     Then I should see "(first  fifth)"
 
   Scenario: Not breaking C-u C-SPC
@@ -635,13 +635,13 @@ Feature: composable
   Scenario: Kill with composable-begin-argument
     When I insert "first second third forth fifth"
     And I place the cursor before "third"
-    And I press "C-w , l"
+    And I press "C-w [ l"
     Then I should see "third forth fifth"
 
   Scenario: Kill with composable-end-argument
     When I insert "first second third forth fifth"
     And I place the cursor before "third"
-    And I press "C-w . l"
+    And I press "C-w ] l"
     Then I should see "first second "
 
   Scenario: Composable-mark mode word
