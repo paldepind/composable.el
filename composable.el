@@ -149,7 +149,7 @@ specifies and call COMMAND on the region."
 	    (composable-object-mode)))))
 
 (defmacro composable-def (commands-list)
-  "Define composable function from a list COMMANDS.
+  "Define composable function from a list COMMANDS-LIST.
 The list should contain functions operating on regions.
 For each function named foo a function name composable-foo is created."
   `(progn ,@(mapcar #'composable-create-composable commands-list)
@@ -183,7 +183,7 @@ For each function named foo a function name composable-foo is created."
         (set-mark (point)))
       (goto-char composable--start-marker))))
 
-(defun composable--repeater (command object direction)
+(defun composable--repeater (command object prefix)
   "Preserve point at POINT-MARKER when doing COMMAND.
 Executes on OBJECT in LAST-PREFIX direction."
   (lambda ()
@@ -192,16 +192,15 @@ Executes on OBJECT in LAST-PREFIX direction."
       (goto-char (mark t)))
     (activate-mark)
     (setq composable--count (1+ composable--count))
-    (let ((current-prefix-arg direction))
+    (let ((current-prefix-arg (composable--direction prefix)))
       (call-interactively object))
     (composable--call-excursion command)))
 
-(defconst composable--arguments
-  '(universal-argument
-    digit-argument
-    negative-argument
-    composable-begin-argument
-    composable-end-argument))
+(defconst composable--arguments '(universal-argument
+				  digit-argument
+				  negative-argument
+				  composable-begin-argument
+				  composable-end-argument))
 
 (defun composable--object-exit ()
   "Actions to perform every time composable exits."
@@ -235,8 +234,7 @@ Executes on OBJECT in LAST-PREFIX direction."
   (set-transient-map
    (composable--singleton-map
     (vector last-command-event)
-    (composable--repeater composable--command object
-                          (composable--direction last-prefix-arg)))
+    (composable--repeater composable--command object last-prefix-arg))
    t
    #'composable--object-exit))
 
