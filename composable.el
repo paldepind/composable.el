@@ -341,7 +341,7 @@ This also prevents messing the clipboard."
   (if composable-object-mode
       (progn
 	(when (and composable-mode-line-color  ;; Mode-line
-		   (color-supported-p composable-mode-line-color))
+		   (color-supported-p composable-mode-line-color nil t))
 	  (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
 	  (set-face-attribute 'mode-line nil :background composable-mode-line-color))
 
