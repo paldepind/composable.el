@@ -100,7 +100,7 @@ This can be either a function or any value accepted by
   "Faced used to highlight the saved region.")
 
 (defvar composable--overlay nil)
-(defvar composable--saved-mode-line-color nil)
+(defvar composable--mode-line-face-cookie nil)
 (defvar composable--command nil)
 (defvar composable--count 0)                 ;; Count the repeated times
 (defvar composable--prefix-arg nil)
@@ -210,8 +210,8 @@ Executes on OBJECT in LAST-PREFIX direction."
 
   (when composable--saved-cursor
    (setq cursor-type composable--saved-cursor))
-  (when composable--saved-mode-line-color
-    (set-face-attribute 'mode-line nil :background composable--saved-mode-line-color))
+  (when composable--mode-line-face-cookie
+    (face-remap-remove-relative composable--mode-line-face-cookie))
   (when composable--overlay
     (delete-overlay composable--overlay))
 
@@ -342,8 +342,8 @@ This also prevents messing the clipboard."
       (progn
 	(when (and composable-mode-line-color  ;; Mode-line
 		   (color-supported-p composable-mode-line-color nil t))
-	  (setq composable--saved-mode-line-color (face-attribute 'mode-line :background))
-	  (set-face-attribute 'mode-line nil :background composable-mode-line-color))
+	  (setq composable--mode-line-face-cookie
+		(face-remap-add-relative 'mode-line :background composable-mode-line-color)))
 
 	(when composable-object-cursor       ;; "Change cursor cursor to C"
 	  (setq composable--saved-cursor cursor-type
@@ -366,7 +366,8 @@ This also prevents messing the clipboard."
 
 	(add-hook 'post-command-hook #'composable--post-command-hook-handler)
 	(advice-add 'keyboard-quit :before #'composable-object-mode-disable)
-	(composable-mode-debug-message "Start composable-object-mode (command: %s)" this-command))
+	(composable-mode-debug-message
+	 "Start composable-object-mode (command: %s)" this-command))
 
     ;; else
     (remove-hook 'post-command-hook #'composable--post-command-hook-handler)
@@ -382,6 +383,7 @@ This also prevents messing the clipboard."
       (deactivate-mark))))
 
 (defun composable-object-mode-disable ()
+  "Disable `composable' mode if enabled."
   (interactive)
   (when composable-object-mode ;; This check is extremely important
     (funcall-interactively #'composable-object-mode -1)))
