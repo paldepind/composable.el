@@ -26,7 +26,6 @@
 
 ;;; Code:
 
-(defvar composable--border-point)
 (defvar composable--count)
 
 (defsubst composable--direction (arg)
@@ -55,7 +54,6 @@ The movement must mark backwards with negative arguments."
      (when (= composable--count 1)
        (funcall ,forward dir)
        (funcall ,forward (- dir))
-       (setq composable--border-point (point-marker))
        (set-mark (point)))
      (funcall ,forward amount)))
 
