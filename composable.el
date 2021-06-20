@@ -168,7 +168,7 @@ For each function named foo a function name composable-foo is created."
 		 downcase-region
 		 delete-region))
 
-(defun composable-half-cursor ()
+(defsubst composable-half-cursor ()
   "Change cursor to a half-height box."
   (setq cursor-type
 	(cons 'hbar (/ (window-pixel-height) (* (window-height) 2)))))
