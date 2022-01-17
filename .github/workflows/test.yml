@@ -30,11 +30,30 @@ jobs:
           version: 'snapshot'
 
       - name: Build
-        run: cask
+        run: cask install
 
       - name: Test
-        run: make test
+        run: cask exec ecukes
+
+      - name: Coverals
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: emacs-${{ matrix.emacs_version }}
+          parallel: true
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
 
 # A pretty complete example
 # https://github.com/szermatt/emacs-bash-completion/blob/fa5557709ee11b41a2b5393efe60cd464c56f76e/.github/workflows/test.yml
 
+# Coverals code
+# https://github.com/undercover-el/undercover.el-github-coveralls-integration-example/blob/master/.github/workflows/test.yml#L30
