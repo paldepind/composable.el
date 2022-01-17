@@ -379,19 +379,21 @@ This also prevents messing the clipboard."
   :lighter " Composable mode"
   :global 1
   :keymap composable-mode-map
-  (if composable-mode
-      (progn
-        (setq composable--overlay (make-overlay 0 0))
+  (cond
+   (composable-mode
+    (setq composable--overlay (make-overlay 0 0))
 
-        (overlay-put composable--overlay 'priority 999)
-        (overlay-put composable--overlay 'face 'composable-highlight)
-        ;; associate the overlay with no specific buffer. Otherwise it
-        ;; may be not visible when set for the first time and appear
-        ;; visible when not expected.
-        (delete-overlay composable--overlay)
-	(advice-add 'copy-region-as-kill :before #'copy-region-as-kill-advise))
+    (overlay-put composable--overlay 'priority 999)
+    (overlay-put composable--overlay 'face 'composable-highlight)
+    ;; associate the overlay with no specific buffer. Otherwise it
+    ;; may be not visible when set for the first time and appear
+    ;; visible when not expected.
+    (delete-overlay composable--overlay)
+    (advice-add 'copy-region-as-kill :before #'copy-region-as-kill-advise))
+   (t
     (setq composable--overlay nil)
-    (advice-remove 'copy-region-as-kill #'copy-region-as-kill-advise)))
+    (advice-remove 'copy-region-as-kill #'copy-region-as-kill-advise)
+    (composable-mark-mode -1))))
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave object mode when the mark is disabled."
@@ -410,12 +412,13 @@ Activates composable-object-mode unless ARG is non-nil."
 (define-minor-mode composable-mark-mode
   "Toggle composable mark mode."
   :global 1
-  (if composable-mark-mode
-      (progn
-        (add-hook 'deactivate-mark-hook #'composable--deactivate-mark-hook-handler)
-        (advice-add 'set-mark-command :before #'composable--set-mark-command-advice))
+  (cond
+   (composable-mark-mode
+    (add-hook 'deactivate-mark-hook #'composable--deactivate-mark-hook-handler)
+    (advice-add 'set-mark-command :before #'composable--set-mark-command-advice))
+   (t
     (remove-hook 'deactivate-mark-hook #'composable--deactivate-mark-hook-handler)
-    (advice-remove 'set-mark-command #'composable--set-mark-command-advice)))
+    (advice-remove 'set-mark-command #'composable--set-mark-command-advice))))
 
 (provide 'composable)
 
