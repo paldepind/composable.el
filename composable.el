@@ -170,8 +170,7 @@ For each function named foo a function name composable-foo is created."
 
 (defsubst composable-half-cursor ()
   "Change cursor to a half-height box."
-  (setq cursor-type
-	(cons 'hbar (/ (window-pixel-height) (* (window-height) 2)))))
+  (cons 'hbar (/ (window-pixel-height) (* (window-height) 2))))
 
 (defun composable--call-excursion (command)
   "Call COMMAND if set then go to POINT-MARK marker."
