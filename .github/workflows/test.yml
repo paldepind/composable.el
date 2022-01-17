@@ -4,14 +4,16 @@ on: [push]
 
 jobs:
   test:
-    name: Test ${{ matrix.emacs_version }}
+    name: Emacs ${{ matrix.emacs_version }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       matrix:
         emacs_version:
-          - '25.1'
-          - '26.3'
-          - '27.1'
+          - 25.1
+          - 26.3
+          - 27.2
+          - snapshot
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v2
