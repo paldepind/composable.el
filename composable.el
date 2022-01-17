@@ -76,8 +76,8 @@
   "Keep only the last copied text in the `kill-ring'."
   :type 'boolean)
 
-(defcustom composable-object-cursor (and (display-graphic-p)
-                                         #'composable-half-cursor)
+(defcustom composable-object-cursor (if (display-graphic-p)
+                                        #'composable-half-cursor)
   "Use a custom face for the cursor when in object mode.
 This can be either a function or any value accepted by
 `cursor-type'."
@@ -329,38 +329,36 @@ This also prevents messing the clipboard."
   :lighter (if (> composable-mode-debug-level 1)
                " Composable object" "")
   :keymap composable-object-mode-map
-  (if composable-object-mode
-      (progn
-	(when (and composable-mode-line-color  ;; Mode-line
-		   (color-supported-p composable-mode-line-color nil t))
-	  (setq composable--mode-line-face-cookie
-		(face-remap-add-relative 'mode-line :background composable-mode-line-color)))
+  (cond ;; when enabling composable
+   (composable-object-mode
+    (setq composable--start-marker (point-marker)
+          composable--count 0
+          composable--char-input nil)
 
-	(when composable-object-cursor       ;; "Change cursor cursor to C"
-	  (setq composable--saved-cursor cursor-type
-		cursor-type (or (and (functionp composable-object-cursor)
-				     (funcall composable-object-cursor))
-				composable-object-cursor)))
+    (push-mark nil t)
 
-	(setq composable--start-marker (point-marker)
-              composable--count 0
-              composable--char-input nil)
+    (when (and composable-mode-line-color  ;; Mode-line
+	       (color-supported-p composable-mode-line-color nil t))
+      (setq composable--mode-line-face-cookie
+	    (face-remap-add-relative 'mode-line :background composable-mode-line-color)))
 
-	(push-mark nil t)
+    (when composable-object-cursor       ;; "Change cursor cursor to C"
+      (setq composable--saved-cursor cursor-type
+	    cursor-type (or (and (functionp composable-object-cursor)
+				 (funcall composable-object-cursor))
+			    composable-object-cursor)))
+    ;; which-key
+    (when (and composable-which-keys
+	       (bound-and-true-p which-key-mode))
+      (setq composable--which-key-timer
+	    (run-with-idle-timer which-key-idle-delay nil
+				 #'which-key-show-keymap 'composable-object-mode-map t)))
 
-	;; which-key
-	(when (and composable-which-keys
-		   (bound-and-true-p which-key-mode))
-	  (setq composable--which-key-timer
-		(run-with-idle-timer which-key-idle-delay nil
-				     #'which-key-show-keymap 'composable-object-mode-map t)))
-
-	(add-hook 'post-command-hook #'composable--post-command-hook-handler)
-	(advice-add 'keyboard-quit :before #'composable-object-mode-disable)
-	(composable-mode-debug-message
-	 "Start composable-object-mode (command: %s)" this-command))
-
-    ;; else
+    (add-hook 'post-command-hook #'composable--post-command-hook-handler)
+    (advice-add 'keyboard-quit :before #'composable-object-mode-disable)
+    (composable-mode-debug-message
+     "Start composable-object-mode (command: %s)" this-command))
+   (t ;; when disabling composable
     (remove-hook 'post-command-hook #'composable--post-command-hook-handler)
     (setq composable--prefix-arg nil
           composable--command nil)
@@ -368,16 +366,13 @@ This also prevents messing the clipboard."
     (when (bound-and-true-p which-key-mode)
       (cancel-timer composable--which-key-timer))
 
-    (when (or (called-interactively-p 'any)
-              (not composable-repeat))
+    (unless composable-repeat
       (composable--object-exit)
-      (deactivate-mark))))
+      (deactivate-mark)))))
 
 (defun composable-object-mode-disable ()
   "Disable `composable' mode if enabled."
-  (interactive)
-  (when composable-object-mode ;; This check is extremely important
-    (funcall-interactively #'composable-object-mode -1)))
+  (composable-object-mode -1))
 
 ;;;###autoload
 (define-minor-mode composable-mode
