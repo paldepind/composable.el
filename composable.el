@@ -218,25 +218,19 @@ Executes on OBJECT in LAST-PREFIX direction."
   (advice-remove 'keyboard-quit #'composable-object-mode-disable)
   (setq composable--expand nil))  ;; By default the commands don't expand
 
-(defun composable--singleton-map (key def)
-  "Create a map with a single KEY with definition DEF."
-  (let ((map (make-sparse-keymap)))
-    (define-key map key def)
-    ;; When using composable char can repeat the char to repeat the
-    ;; command
-    (if (characterp composable--char-input)
-        (define-key map (string composable--char-input) def))
-    map))
-
 (defun composable--activate-repeat (object)
   "Activate repeat map on OBJECT preserving point at POINT-MARKER."
   (interactive)
-  (set-transient-map
-   (composable--singleton-map
-    (vector last-command-event)
-    (composable--repeater composable--command object last-prefix-arg))
-   t
-   #'composable--object-exit))
+  (let ((map (make-sparse-keymap))
+	(key (this-command-keys-vector))
+	(def (composable--repeater composable--command object last-prefix-arg)))
+
+    (define-key map key def)
+
+    (when (characterp composable--char-input)
+      (define-key map (string composable--char-input) def))
+
+    (set-transient-map map t #'composable--object-exit)))
 
 (defun composable--handle-prefix (command)
   "Handle prefix arg where the COMMAND is paired in PAIRS."
