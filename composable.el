@@ -183,19 +183,6 @@ For each function named foo a function name composable-foo is created."
         (set-mark (point)))
       (goto-char composable--start-marker))))
 
-(defun composable--repeater (command object prefix)
-  "Preserve point at POINT-MARKER when doing COMMAND.
-Executes on OBJECT in LAST-PREFIX direction."
-  (lambda ()
-    (interactive)
-    (unless composable--expand
-      (goto-char (mark t)))
-    (activate-mark)
-    (setq composable--count (1+ composable--count))
-    (let ((current-prefix-arg (composable--direction prefix)))
-      (call-interactively object))
-    (composable--call-excursion command)))
-
 (defconst composable--arguments '(universal-argument
 				  digit-argument
 				  negative-argument
@@ -221,9 +208,19 @@ Executes on OBJECT in LAST-PREFIX direction."
 (defun composable--activate-repeat (object)
   "Activate repeat map on OBJECT preserving point at POINT-MARKER."
   (interactive)
-  (let ((map (make-sparse-keymap))
-	(key (this-command-keys-vector))
-	(def (composable--repeater composable--command object last-prefix-arg)))
+  (let* ((map (make-sparse-keymap))
+	 (key (this-command-keys-vector))
+	 (command composable--command)
+	 (prefix last-prefix-arg)
+	 (def (lambda ()
+		(interactive)
+		(unless composable--expand
+		  (goto-char (mark t)))
+		(activate-mark)
+		(setq composable--count (1+ composable--count))
+		(let ((current-prefix-arg (composable--direction prefix)))
+		  (call-interactively object))
+		(composable--call-excursion command))))
 
     (define-key map key def)
 
