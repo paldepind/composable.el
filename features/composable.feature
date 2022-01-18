@@ -601,6 +601,14 @@ Feature: composable
   Scenario: Copy with goto-char repeating and C-e
     When I insert "first second third forth fifth"
     And I place the cursor before "second"
+    And I press "M-w w w w"
+    And I press "C-e"
+    And I press "C-y"
+    Then I should see "first second third forth fifthsecond third forth"
+
+  Scenario: Copy with goto-char repeating and C-e
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
     And I press "M-w c t t"
     And I press "C-e"
     And I press "C-y"
@@ -657,3 +665,12 @@ Feature: composable
     And I press "C-SPC e"
     And I press "C-w"
     Then I should see "first "
+
+Scenario: Disabling composable mode
+    When I insert "foo"
+    And I start an action chain
+    And I press "M-x"
+    And I type "composable-mode"
+    And I execute the action chain
+    And I press "M-w f"
+    Then I should see "foof"
