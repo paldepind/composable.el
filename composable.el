@@ -202,7 +202,7 @@ For each function named foo a function name composable-foo is created."
   (when composable--overlay
     (delete-overlay composable--overlay))
 
-  (advice-remove 'keyboard-quit #'composable-object-mode-disable)
+  (advice-remove 'keyboard-quit #'composable--object-mode-disable)
   (setq composable--expand nil))  ;; By default the commands don't expand
 
 (defun composable--activate-repeat (object)
@@ -340,7 +340,7 @@ This also prevents messing the clipboard."
     (when (and composable-mode-line-color  ;; Mode-line
 	       (color-supported-p composable-mode-line-color nil t))
       (setq composable--mode-line-saved-color (face-attribute 'mode-line :background))
-      (set-face-background 'mode-line composable-mode-line-color)))
+      (set-face-background 'mode-line composable-mode-line-color))
 
     (when composable-object-cursor       ;; "Change cursor cursor to C"
       (setq composable--saved-cursor cursor-type
@@ -355,7 +355,7 @@ This also prevents messing the clipboard."
 				 #'which-key-show-keymap 'composable-object-mode-map t)))
 
     (add-hook 'post-command-hook #'composable--post-command-hook-handler)
-    (advice-add 'keyboard-quit :before #'composable-object-mode-disable)
+    (advice-add 'keyboard-quit :before #'composable--object-mode-disable)
     (composable-mode-debug-message
      "Start composable-object-mode (command: %s)" this-command))
    (t ;; when disabling composable
@@ -363,16 +363,17 @@ This also prevents messing the clipboard."
     (setq composable--prefix-arg nil
           composable--command nil)
 
-    (when (bound-and-true-p which-key-mode)
-      (cancel-timer composable--which-key-timer))
+    (when (timerp composable--which-key-timer)
+      (setq composable--which-key-timer (cancel-timer composable--which-key-timer)))
 
     (unless composable-repeat
       (composable--object-exit)
       (deactivate-mark)))))
 
-(defun composable-object-mode-disable ()
+(defun composable--object-mode-disable ()
   "Disable `composable' mode if enabled."
-  (composable-object-mode -1))
+  (let ((composable-repeat nil))
+    (composable-object-mode -1)))
 
 ;;;###autoload
 (define-minor-mode composable-mode
@@ -396,10 +397,6 @@ This also prevents messing the clipboard."
     (advice-remove 'copy-region-as-kill #'copy-region-as-kill-advise)
     (composable-mark-mode -1))))
 
-(defun composable--deactivate-mark-hook-handler ()
-  "Leave object mode when the mark is disabled."
-  (composable-object-mode-disable))
-
 (defun composable--set-mark-command-advice (arg)
   "Advice for `set-mark-command'.
 Activates composable-object-mode unless ARG is non-nil."
@@ -415,10 +412,10 @@ Activates composable-object-mode unless ARG is non-nil."
   :global 1
   (cond
    (composable-mark-mode
-    (add-hook 'deactivate-mark-hook #'composable--deactivate-mark-hook-handler)
+    (add-hook 'deactivate-mark-hook #'composable--object-mode-disable)
     (advice-add 'set-mark-command :before #'composable--set-mark-command-advice))
    (t
-    (remove-hook 'deactivate-mark-hook #'composable--deactivate-mark-hook-handler)
+    (remove-hook 'deactivate-mark-hook #'composable--object-mode-disable)
     (advice-remove 'set-mark-command #'composable--set-mark-command-advice))))
 
 (provide 'composable)
