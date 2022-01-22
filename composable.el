@@ -100,13 +100,13 @@ This can be either a function or any value accepted by
   "Faced used to highlight the saved region.")
 
 (defvar composable--overlay nil)
-(defvar composable--mode-line-face-cookie nil)
 (defvar composable--command nil)
 (defvar composable--count 0)                 ;; Count the repeated times
 (defvar composable--prefix-arg nil)
 (defvar composable--start-marker (make-marker))
 (defvar composable--command-prefix nil)
 (defvar composable--saved-cursor nil)
+(defvar composable--mode-line-saved-color nil)
 (defvar composable--expand nil)
 (defvar composable--which-key-timer nil)
 (defvar composable--char-input nil)
@@ -196,8 +196,9 @@ For each function named foo a function name composable-foo is created."
 
   (when composable--saved-cursor
    (setq cursor-type composable--saved-cursor))
-  (when composable--mode-line-face-cookie
-    (face-remap-remove-relative composable--mode-line-face-cookie))
+  (when composable--mode-line-saved-color
+    (set-face-background 'mode-line composable--mode-line-saved-color)
+    (setq composable--mode-line-saved-color nil))
   (when composable--overlay
     (delete-overlay composable--overlay))
 
@@ -338,8 +339,8 @@ This also prevents messing the clipboard."
 
     (when (and composable-mode-line-color  ;; Mode-line
 	       (color-supported-p composable-mode-line-color nil t))
-      (setq composable--mode-line-face-cookie
-	    (face-remap-add-relative 'mode-line :background composable-mode-line-color)))
+      (setq composable--mode-line-saved-color (face-attribute 'mode-line :background))
+      (set-face-background 'mode-line composable-mode-line-color)))
 
     (when composable-object-cursor       ;; "Change cursor cursor to C"
       (setq composable--saved-cursor cursor-type
