@@ -397,6 +397,10 @@ This also prevents messing the clipboard."
     (advice-remove 'copy-region-as-kill #'copy-region-as-kill-advise)
     (composable-mark-mode -1))))
 
+(defun composable--deactivate-mark-hook-handler ()
+  "Leave object mode when the mark is disabled."
+  (composable-object-mode -1))
+
 (defun composable--set-mark-command-advice (arg)
   "Advice for `set-mark-command'.
 Activates composable-object-mode unless ARG is non-nil."
@@ -412,10 +416,10 @@ Activates composable-object-mode unless ARG is non-nil."
   :global 1
   (cond
    (composable-mark-mode
-    (add-hook 'deactivate-mark-hook #'composable--object-mode-disable)
+    (add-hook 'deactivate-mark-hook #'composable--deactivate-mark-hook-handler)
     (advice-add 'set-mark-command :before #'composable--set-mark-command-advice))
    (t
-    (remove-hook 'deactivate-mark-hook #'composable--object-mode-disable)
+    (remove-hook 'deactivate-mark-hook #'composable--deactivate-mark-hook-handler)
     (advice-remove 'set-mark-command #'composable--set-mark-command-advice))))
 
 (provide 'composable)
