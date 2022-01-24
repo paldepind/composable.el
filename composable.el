@@ -411,11 +411,9 @@ Activates composable-object-mode unless ARG is non-nil."
 (define-minor-mode composable-mark-mode
   "Toggle composable mark mode."
   :global 1
-  (cond
-   (composable-mark-mode
-    (advice-add 'set-mark-command :after #'composable--set-mark-command-advice))
-   (t
-    (advice-remove 'set-mark-command #'composable--set-mark-command-advice))))
+  (if composable-mark-mode
+      (advice-add 'set-mark-command :after #'composable--set-mark-command-advice)
+    (advice-remove 'set-mark-command #'composable--set-mark-command-advice)))
 
 (provide 'composable)
 
