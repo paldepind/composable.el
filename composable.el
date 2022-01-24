@@ -399,7 +399,8 @@ This also prevents messing the clipboard."
 
 (defun composable--deactivate-mark-hook-handler ()
   "Leave object mode when the mark is disabled."
-  (composable-object-mode -1))
+  (let ((composable-repeat (not (eq last-command #'set-mark-command))))
+    (composable-object-mode -1)))
 
 (defun composable--set-mark-command-advice (arg)
   "Advice for `set-mark-command'.
