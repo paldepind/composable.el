@@ -275,7 +275,7 @@ For each function named foo a function name composable-foo is created."
     (setq composable--char-input (read-char "char: " t)))
   (search-forward (char-to-string composable--char-input) nil nil arg))
 
-(defun copy-region-as-kill-advise (beg end &optional _)
+(defun composable--copy-region-as-kill-advise (beg end &optional _)
   "Extra advise for copy-region-as-kill to enable the overlay.
 
 This also prevents messing the clipboard."
@@ -391,10 +391,10 @@ This also prevents messing the clipboard."
     ;; may be not visible when set for the first time and appear
     ;; visible when not expected.
     (delete-overlay composable--overlay)
-    (advice-add 'copy-region-as-kill :before #'copy-region-as-kill-advise))
+    (advice-add 'copy-region-as-kill :before #'composable--copy-region-as-kill-advise))
    (t
     (setq composable--overlay nil)
-    (advice-remove 'copy-region-as-kill #'copy-region-as-kill-advise)
+    (advice-remove 'copy-region-as-kill #'composable--copy-region-as-kill-advise)
     (composable-mark-mode -1))))
 
 (defun composable--set-mark-command-advice (arg)
