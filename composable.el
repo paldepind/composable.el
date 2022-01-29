@@ -403,7 +403,7 @@ Activates composable-object-mode unless ARG is non-nil."
   (if (or composable-object-mode
           arg
           (bound-and-true-p multiple-cursors-mode))
-      (composable-object-mode -1)
+      (composable--object-mode-disable)
     (setq composable--expand t)
     (composable-object-mode 1)))
 
