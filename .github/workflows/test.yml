@@ -35,14 +35,14 @@ jobs:
       - name: Test
         run: cask exec ecukes
 
-      - name: Coverals
+      - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: emacs-${{ matrix.emacs_version }}
           parallel: true
 
-  Coveralls:
+  Coveralls_offload:
     needs: Tests
     runs-on: ubuntu-latest
     steps:
