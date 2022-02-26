@@ -400,12 +400,17 @@ This also prevents messing the clipboard."
 (defun composable--set-mark-command-advice (arg)
   "Advice for `set-mark-command'.
 Activates composable-object-mode unless ARG is non-nil."
-  (if (or composable-object-mode
-          arg
-          (bound-and-true-p multiple-cursors-mode))
-      (composable--object-mode-disable)
+  (cond
+   ((and set-mark-command-repeat-pop
+	 (eq last-command 'pop-to-mark-command)
+	 (not arg)))
+   ((or composable-object-mode arg)
+    (composable--object-mode-disable))
+   ((bound-and-true-p multiple-cursors-mode)
+    (composable-object-mode -1))
+   (t
     (setq composable--expand t)
-    (composable-object-mode 1)))
+    (composable-object-mode 1))))
 
 ;;;###autoload
 (define-minor-mode composable-mark-mode
