@@ -335,7 +335,8 @@ This also prevents messing the clipboard."
           composable--count 0
           composable--char-input nil)
 
-    (push-mark nil t)
+    (unless (eq this-command #'set-mark-command)
+      (push-mark nil t))
 
     (when (and composable-mode-line-color  ;; Mode-line
 	       (color-supported-p composable-mode-line-color nil t))
@@ -403,7 +404,7 @@ Activates composable-object-mode unless ARG is non-nil."
   (cond
    ((and set-mark-command-repeat-pop
 	 (eq last-command 'pop-to-mark-command)
-	 (not arg)))
+	 (not arg)))    ;; not activate on repeat pop mark
    ((or composable-object-mode arg)
     (composable--object-mode-disable))
    ((bound-and-true-p multiple-cursors-mode)
