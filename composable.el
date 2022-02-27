@@ -335,7 +335,7 @@ This also prevents messing the clipboard."
           composable--count 0
           composable--char-input nil)
 
-    (unless (eq this-command #'set-mark-command)
+    (unless (region-active-p)
       (push-mark nil t))
 
     (when (and composable-mode-line-color  ;; Mode-line
