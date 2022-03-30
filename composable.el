@@ -418,8 +418,8 @@ Activates composable-object-mode unless ARG is non-nil."
   "Toggle composable mark mode."
   :global 1
   (if composable-mark-mode
-      (advice-add 'set-mark-command :after #'composable--set-mark-command-advice)
-    (advice-remove 'set-mark-command #'composable--set-mark-command-advice)))
+      (advice-add #'set-mark-command :after #'composable--set-mark-command-advice)
+    (advice-remove #'set-mark-command #'composable--set-mark-command-advice)))
 
 (provide 'composable)
 
