@@ -273,16 +273,13 @@ end. But <kbd>C-w , h</kbd> will kill one paragraph backwards and
 
 ### With pair movements
 
-With the function `composable-add-pair` you can define movement
-commands to be each others pair. For instance the following pair is
-defined by default.
+The variable `composable-fn-pair-alist` define movement commands
+to be each others pair. For instance the following pair is defined by
+default.
 
 ```lisp
-(composable-add-pair 'forward-word 'backward-word)
+(add-to-list 'composable-fn-pair-alist '(forward-word . backward-word))
 ```
-
-Alternatively multiple several pairs can be defined with
-`composable-add-pairs`.
 
 When a prefix argument is specified before a paired movement command
 (begin and end are treated the same) the two commands are used to
@@ -318,6 +315,17 @@ To disable this feature just add:
 ```
 
 to your config.
+
+## Debug messages
+
+Composable has a way to control the messages printed in the minibuffer
+and/or the \*Messages\* using the variable
+`composable-mode-debug-level' which has the following valid values:
+
+* **0**: No debug info is printed at all.
+* **1**: The debug info is printed only in the \*Messages\* buffer but not in the minibuffer.
+* **2**: The debug info is printed in \*Messages\* and in the minibuffer.
+
 
 ## Kill specific options
 

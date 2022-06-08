@@ -8,4 +8,5 @@
  (depends-on "espuds")
  (depends-on "ert-runner")
  (depends-on "el-mock")
- (depends-on "undercover"))
+ (depends-on "undercover")
+ (depends-on "which-key"))

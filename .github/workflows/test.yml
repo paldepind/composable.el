@@ -1,0 +1,59 @@
+name: Test composable in emacs
+
+on: [push]
+
+jobs:
+  Tests:
+    name: Emacs ${{ matrix.emacs_version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        emacs_version:
+          - 25.1
+          - 26.3
+          - 27.2
+          - snapshot
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+          architecture: 'x64'
+
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs_version }}
+
+      - uses: conao3/setup-cask@master
+        with:
+          version: 'snapshot'
+
+      - name: Build
+        run: cask install
+
+      - name: Test
+        run: cask exec ecukes
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: emacs-${{ matrix.emacs_version }}
+          parallel: true
+
+  Coveralls_offload:
+    needs: Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
+
+# A pretty complete example
+# https://github.com/szermatt/emacs-bash-completion/blob/fa5557709ee11b41a2b5393efe60cd464c56f76e/.github/workflows/test.yml
+
+# Coverals code
+# https://github.com/undercover-el/undercover.el-github-coveralls-integration-example/blob/master/.github/workflows/test.yml#L30

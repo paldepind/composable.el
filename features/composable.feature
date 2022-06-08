@@ -7,17 +7,31 @@ Feature: composable
     Given the buffer is empty
     And there is no region selected
 
-  Scenario: Delete to end of line
+  Scenario: Kill to end of line
     When I insert "foo bar"
     And I place the cursor after "foo"
     And I press "C-w e"
     Then I should not see "bar"
     Then I should see pattern "^foo$"
 
-  Scenario: Delete to beginning of line
+  Scenario: Delete to end of line
+    When I insert "foo bar"
+    And I place the cursor after "foo"
+    And I press "C-k e"
+    Then I should not see "bar"
+    Then I should see pattern "^foo$"
+
+  Scenario: Kill to beginning of line
     When I insert "foo bar"
     And I place the cursor after "foo "
     And I press "C-w a"
+    Then I should not see "foo"
+    Then I should see pattern "^bar$"
+
+  Scenario: Delete to beginning of line
+    When I insert "foo bar"
+    And I place the cursor after "foo "
+    And I press "C-k a"
     Then I should not see "foo"
     Then I should see pattern "^bar$"
 
@@ -27,16 +41,28 @@ Feature: composable
     And I press "C-w"
     Then I should see "foo baz"
 
+  Scenario: C-k with active region
+    When I insert "foo bar baz"
+    And I select " bar"
+    And I press "C-k"
+    Then I should see "foo baz"
+
   Scenario: Pass prefix argument along to action
     # Fixme
 
-  Scenario: Deleting word with forward word
+  Scenario: Kill word with forward word
     When I insert "first second third fourth"
     And I place the cursor after "first"
     And I press "C-w f"
     Then I should see "first third fourth"
 
-  Scenario: Delete paragraph
+  Scenario: Delete word with forward word
+    When I insert "first second third fourth"
+    And I place the cursor after "first"
+    And I press "C-k f"
+    Then I should see "first third fourth"
+
+  Scenario: Kill paragraph
     When I insert:
     """
     Foo
@@ -79,6 +105,21 @@ Feature: composable
       3. line
     """
 
+  Scenario: C-k to delete line
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "2."
+    And I press "C-k l"
+    Then I should see:
+    """
+      1. line
+      3. line
+    """
+
   Scenario: Kill line by repeating action
     When I insert:
     """
@@ -88,6 +129,21 @@ Feature: composable
     """
     And I place the cursor after "2."
     And I press "C-w C-w"
+    Then I should see:
+    """
+      1. line
+      3. line
+    """
+
+  Scenario: Delete line by repeating action
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "2."
+    And I press "C-k C-k"
     Then I should see:
     """
       1. line
@@ -105,6 +161,17 @@ Feature: composable
     And I press "C-w C-w C-w"
     Then I should not see "3. line"
 
+  Scenario: Delete several lines by repeating action
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "2."
+    And I press "C-k C-k C-k"
+    Then I should not see "3. line"
+
   Scenario: Kill several lines
     When I insert:
     """
@@ -114,6 +181,20 @@ Feature: composable
     """
     And I place the cursor after "1."
     And I press "C-w 2 l"
+    Then I should see:
+    """
+      3. line
+    """
+
+  Scenario: Delete several lines
+    When I insert:
+    """
+      1. line
+      2. line
+      3. line
+    """
+    And I place the cursor after "1."
+    And I press "C-k 2 l"
     Then I should see:
     """
       3. line
@@ -129,6 +210,25 @@ Feature: composable
     And I place the cursor after "2."
     And I start an action chain
     And I press "C-w"
+    And I press "-"
+    And I press "l"
+    And I execute the action chain
+    Then I should see:
+    """
+    2. line
+    3. line
+    """
+
+  Scenario: Delete line backwards
+    When I insert:
+    """
+    1. line
+    2. line
+    3. line
+    """
+    And I place the cursor after "2."
+    And I start an action chain
+    And I press "C-k"
     And I press "-"
     And I press "l"
     And I execute the action chain
@@ -182,20 +282,20 @@ Feature: composable
     And I press "a"
     Then I should see "first asecond third"
 
-  Scenario: Cancel with g
-    When I insert "first second third"
-    And I place the cursor before "second"
-    And I press "C-w"
-    And I press "g"
-    And I press "a"
-    Then I should see "first asecond third"
+  # Scenario: Cancel with g
+  #   When I insert "first second third"
+  #   And I place the cursor before "second"
+  #   And I press "C-w"
+  #   And I press "g"
+  #   And I press "a"
+  #   Then I should see "first asecond third"
 
   Scenario: Use beginning of region with prefix
     When I insert "first second third"
     And I place the cursor before "second"
     And I start an action chain
     And I press "C-w"
-    And I press ","
+    And I press "["
     And I press "l"
     And I execute the action chain
     Then I should see pattern "^second third$"
@@ -205,7 +305,7 @@ Feature: composable
     And I place the cursor before " second"
     And I start an action chain
     And I press "C-w"
-    And I press "."
+    And I press "]"
     And I press "l"
     And I execute the action chain
     Then I should see pattern "^first$"
@@ -215,7 +315,7 @@ Feature: composable
     And I place the cursor before "cond"
     And I start an action chain
     And I press "C-w"
-    And I press ","
+    And I press "["
     And I press "f"
     And I execute the action chain
     Then I should see "first  third"
@@ -225,7 +325,7 @@ Feature: composable
     And I start an action chain
     And I place the cursor before "cond"
     And I press "C-w"
-    And I press "."
+    And I press "]"
     And I press "b"
     And I execute the action chain
     Then I should see "first  third"
@@ -235,7 +335,7 @@ Feature: composable
     And I place the cursor before "oo"
     And I start an action chain
     And I press "C-w"
-    And I press ","
+    And I press "["
     And I press "e"
     And I execute the action chain
     And I insert "bar"
@@ -246,7 +346,7 @@ Feature: composable
     And I place the cursor before "cond"
     And I start an action chain
     And I press "C-SPC"
-    And I press "."
+    And I press "]"
     And I press "b"
     And I execute the action chain
     Then the region should be "second"
@@ -352,10 +452,22 @@ Feature: composable
     And I press "C-w w"
     Then I should see "first  third fourth"
 
-  Scenario: Kill several words with repeat
+  Scenario: Delete a word
+    When I insert "first second third fourth"
+    And I place the cursor after "sec"
+    And I press "C-k w"
+    Then I should see "first  third fourth"
+
+  Scenario: Kill several words with numeric and repeat
     When I insert "first second third fourth"
     And I place the cursor after "fi"
     And I press "C-w 2 w w"
+    Then I should see pattern "^ fourth$"
+
+  Scenario: Delete several words with numeric and repeat
+    When I insert "first second third fourth"
+    And I place the cursor after "fi"
+    And I press "C-k 2 w w"
     Then I should see pattern "^ fourth$"
 
   Scenario: Kill several words with repeat backwards
@@ -367,25 +479,31 @@ Feature: composable
   Scenario: Kill a symbol
     When I insert "(first-symbol second third_symbol fourth)"
     And I place the cursor after "thir"
-    And I press "C-w y"
+    And I press "C-w ."
     Then I should see "(first-symbol second  fourth)"
 
   Scenario: Kill symbol at beginning
     When I insert "(first-symbol second third_symbol fourth)"
     And I place the cursor before "third"
-    And I press "C-w y"
+    And I press "C-w ."
     Then I should see "(first-symbol second  fourth)"
 
-  Scenario: Kill several symbols with repeat
+  Scenario: Kill several symbols with numeric and repeat
     When I insert "(first-symbol second third_symbol fourth)"
     And I place the cursor after "fi"
-    And I press "C-w 2 y y"
+    And I press "C-w 2 . ."
+    Then I should see "( fourth)"
+
+  Scenario: Kill several symbols with zero start numeric and repeat
+    When I insert "(first-symbol second third_symbol fourth)"
+    And I place the cursor after "fi"
+    And I press "C-w 02 . ."
     Then I should see "( fourth)"
 
   Scenario: Kill several symbols with repeat backwards
     When I insert "(first second third_symbol &fourth fifth)"
     And I place the cursor after "four"
-    And I press "C-w - y y y"
+    And I press "C-w - . . ."
     Then I should see "(first  fifth)"
 
   Scenario: Not breaking C-u C-SPC
@@ -483,6 +601,14 @@ Feature: composable
   Scenario: Copy with goto-char repeating and C-e
     When I insert "first second third forth fifth"
     And I place the cursor before "second"
+    And I press "M-w w w w"
+    And I press "C-e"
+    And I press "C-y"
+    Then I should see "first second third forth fifthsecond third forth"
+
+  Scenario: Copy with goto-char repeating and C-e
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
     And I press "M-w c t t"
     And I press "C-e"
     And I press "C-y"
@@ -492,6 +618,13 @@ Feature: composable
     When I insert "first second third forth fifth"
     And I place the cursor before "second"
     And I press "M-w c t t"
+    And I press "C-y"
+    Then I should see "first second third fortsecond third forth fifth"
+
+  Scenario: Copy with goto-char with numeric repeating inplace
+    When I insert "first second third forth fifth"
+    And I place the cursor before "second"
+    And I press "M-w 2 c t"
     And I press "C-y"
     Then I should see "first second third fortsecond third forth fifth"
 
@@ -510,13 +643,13 @@ Feature: composable
   Scenario: Kill with composable-begin-argument
     When I insert "first second third forth fifth"
     And I place the cursor before "third"
-    And I press "C-w , l"
+    And I press "C-w [ l"
     Then I should see "third forth fifth"
 
   Scenario: Kill with composable-end-argument
     When I insert "first second third forth fifth"
     And I place the cursor before "third"
-    And I press "C-w . l"
+    And I press "C-w ] l"
     Then I should see "first second "
 
   Scenario: Composable-mark mode word
@@ -532,3 +665,12 @@ Feature: composable
     And I press "C-SPC e"
     And I press "C-w"
     Then I should see "first "
+
+Scenario: Disabling composable mode
+    When I insert "foo"
+    And I start an action chain
+    And I press "M-x"
+    And I type "composable-mode"
+    And I execute the action chain
+    And I press "M-w f"
+    Then I should see "foof"

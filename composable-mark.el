@@ -26,10 +26,9 @@
 
 ;;; Code:
 
-(defvar composable--border-point)
 (defvar composable--count)
 
-(defun composable--direction (arg)
+(defsubst composable--direction (arg)
   "Direction of ARG."
   (let ((n (prefix-numeric-value arg))) (/ n (abs n))))
 
@@ -39,10 +38,9 @@ Between the line above if ARG is negative otherwise below."
   (interactive "p")
   (forward-line arg)
   (cl-flet ((move (dir)
-                  (funcall (if (< 0 dir)
-                               'skip-chars-forward
-                             'skip-chars-backward)
-                           "[:space:]\n")))
+                  (if (< 0 dir)
+                      (skip-chars-forward "[:space:]\n")
+                    (skip-chars-backward "[:space:]\n"))))
     (when (< arg 0) (end-of-line))
     (move arg)
     (push-mark nil nil t)
@@ -56,47 +54,44 @@ The movement must mark backwards with negative arguments."
      (when (= composable--count 1)
        (funcall ,forward dir)
        (funcall ,forward (- dir))
-       (setq composable--border-point (point-marker))
-       (set-mark (point))
-       (if (< 0 amount)
-	   (goto-char (min (mark t) (point)))
-	 (goto-char (max (mark t) (point)))))
+       (set-mark (point)))
      (funcall ,forward amount)))
 
 (defun composable-mark-line (arg)
   "Mark ARG lines.
 Supports negative argument and repeating."
-  (interactive "P")
+  (interactive "p")
   (composable--mark-with-forward #'forward-line arg))
 
 (defun composable-mark-word (arg)
   "Mark ARG words.
 Supports negative arguments and repeating."
-  (interactive "P")
+  (interactive "p")
   (composable--mark-with-forward #'forward-word arg))
 
 (defun composable-mark-symbol (arg)
   "Mark ARG symbols.
 Supports negative arguments and repeating."
-  (interactive "P")
+  (interactive "p")
   (composable--mark-with-forward #'forward-symbol arg))
 
 (defun composable-mark-paragraph (arg)
   "Mark ARG symbols.
 Supports negative arguments and repeating."
-  (interactive "P")
+  (interactive "p")
   (composable--mark-with-forward #'forward-paragraph arg))
 
 (defun composable--up-list (arg)
   "Up-list ARG times with better quotes support."
-  (if (nth 3 (syntax-ppss))
-      (goto-char (nth 8 (syntax-ppss)))
-    (up-list arg)))
+  (let ((syntax-ppss (syntax-ppss)))
+    (if (nth 3 syntax-ppss)
+        (goto-char (nth 8 syntax-ppss))
+      (up-list arg))))
 
 (defun composable-mark-up-list (arg)
   "Mark ARG upper lists.
 Supports negative arguments and repeating."
-  (interactive "P")
+  (interactive "p")
   (composable--mark-up #'forward-sexp #'composable--up-list arg))
 
 (defun composable--mark-up (forward up arg)
