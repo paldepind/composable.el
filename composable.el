@@ -129,24 +129,25 @@ The arguments FORMAT-STRING and ARGS are the same than in the
       (let ((inhibit-message (< composable-mode-debug-level 2)))
         (apply #'message format-string args))))
 
-(defun composable-create-composable (command)
-  "Take a function and return it in a composable wrapper.
+(eval-and-compile
+  (defun composable-create-composable (command)
+    "Take a function and return it in a composable wrapper.
 The returned function will ask for an object, mark the region it
 specifies and call COMMAND on the region."
-  `(defun ,(intern (concat "composable-" (symbol-name `,command))) (arg)
-     ,(format "Composable wrapper for `%s'" (symbol-name command))
-     (interactive "P")
-     (cond ((or (region-active-p) ;; With region
-		(bound-and-true-p multiple-cursors-mode))
-	    (setq composable--count 0)
-	    (call-interactively #',command))
-           (composable-object-mode ;; Repeated
-	    (setq this-command composable-twice-mark)
-	    (funcall composable-twice-mark arg))
-           (t                      ;; First call no region
-	    (setq composable--command-prefix arg
-                  composable--command #',command)
-	    (composable-object-mode)))))
+    `(defun ,(intern (concat "composable-" (symbol-name `,command))) (arg)
+       ,(format "Composable wrapper for `%s'" (symbol-name command))
+       (interactive "P")
+       (cond ((or (region-active-p) ;; With region
+		  (bound-and-true-p multiple-cursors-mode))
+	      (setq composable--count 0)
+	      (call-interactively #',command))
+             (composable-object-mode ;; Repeated
+	      (setq this-command composable-twice-mark)
+	      (funcall composable-twice-mark arg))
+             (t	;; First call no region
+	      (setq composable--command-prefix arg
+                    composable--command #',command)
+	      (composable-object-mode))))))
 
 (defmacro composable-def (commands-list)
   "Define composable function from a list COMMANDS-LIST.
